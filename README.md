@@ -9,7 +9,7 @@ Unity 프로젝트를 위한 Claude Code 플러그인.
 ## 설치
 
 ```bash
-claude plugin install claude-unity.plugin
+claude plugin install claude-unity-harness.plugin
 ```
 
 설치 후 Unity 프로젝트 루트에서 최초 1회 실행:
@@ -65,7 +65,7 @@ git commit 시 자동 실행
 ## 포함 컴포넌트
 
 ```
-claude-unity-plugin/
+claude-unity-harness/
 ├── skills/           슬래시 커맨드 11개 + 레퍼런스 스킬 5개
 ├── agents/           unity-reviewer, architect-planner,
 │                     codebase-explorer, debugger, doc-writer
@@ -89,7 +89,7 @@ claude-unity-plugin/
 ## 플러그인 빌드
 
 ```powershell
-cd claude-unity-plugin
-Compress-Archive -Path * -DestinationPath ..\claude-unity-temp.zip
-Rename-Item ..\claude-unity-temp.zip ..\claude-unity.plugin
+cd claude-unity-harness
+Compress-Archive -Path * -DestinationPath ..\claude-unity-harness-temp.zip
+Rename-Item ..\claude-unity-harness-temp.zip ..\claude-unity-harness.plugin
 ```

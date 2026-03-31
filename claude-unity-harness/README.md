@@ -63,7 +63,7 @@ Unity 프로젝트를 위한 Claude Code CLI 전용 플러그인.
 
 ```bash
 # 플러그인 설치
-claude plugin install claude-unity.plugin
+claude plugin install claude-unity-harness.plugin
 
 # Unity 프로젝트 루트에서 초기화 (최초 1회)
 /setup
@@ -171,7 +171,7 @@ git commit 시 자동 실행
 ## 프로젝트 구조
 
 ```
-claude-unity-plugin/
+claude-unity-harness/
 ├── .claude-plugin/
 │   └── plugin.json          ← 플러그인 메타데이터
 ├── rules/                   ← 응답·Git·코드리뷰 규칙
