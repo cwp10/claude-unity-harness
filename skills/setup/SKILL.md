@@ -2,7 +2,7 @@
 name: setup
 description: >
   Unity 프로젝트를 감지하고 .claude/CLAUDE.md에 스택 정보를 추가한다.
-  하네스 파일(claude-progress.txt, feature_list.json)을 생성하고 pre-commit hook을 설치한다.
+  하네스 파일(.claude/claude-progress.txt, .claude/feature_list.json)을 생성하고 pre-commit hook을 설치한다.
   프로젝트 루트에서 최초 1회 실행. 재실행은 /setup --force.
 allowed-tools: Read, Glob, Bash, Write
 cost: sonnet
@@ -19,7 +19,7 @@ keywords: [setup, init, project, unity, harness]
 
 ### 1단계: 초기화 여부 확인
 
-`claude-progress.txt` 존재 여부 확인 (Read 시도).
+`.claude/claude-progress.txt` 존재 여부 확인 (Read 시도).
 
 파일이 있고 `--force` 인자가 없으면:
 ```
@@ -143,13 +143,13 @@ fi
 
 ### 6단계: 하네스 파일 생성
 
-`.git` 여부와 관계없이 항상 아래 두 파일을 프로젝트 루트에 생성한다.
+`.git` 여부와 관계없이 항상 아래 두 파일을 `.claude/` 에 생성한다.
 (--force 재실행 시에도 덮어쓴다)
 
-**파일 1: claude-progress.txt**
+**파일 1: .claude/claude-progress.txt**
 
 ```
-# claude-progress.txt
+# .claude/claude-progress.txt
 
 ## 프로젝트 정보
 프로젝트: [3단계 프로젝트명]
@@ -162,16 +162,16 @@ fi
 | [오늘 날짜] | 프로젝트 초기화 | ✅ |
 
 ## 현재 진행 상황
-초기화 완료. feature_list.json 의 기능 목록을 확인하고 첫 번째 기능부터 시작하세요.
+초기화 완료. .claude/feature_list.json 의 기능 목록을 확인하고 첫 번째 기능부터 시작하세요.
 
 ## 다음 작업
-feature_list.json 참조
+.claude/feature_list.json 참조
 
 ## 알려진 이슈
 없음
 ```
 
-**파일 2: feature_list.json**
+**파일 2: .claude/feature_list.json**
 
 CLAUDE.md의 "프로젝트 성격"이 이미 채워져 있으면 그에 맞는 템플릿,
 아직 미정이면 게임 기본 템플릿으로 생성한다.
@@ -253,8 +253,8 @@ Unity:    [버전]
   @domains/unity.md
 
 생성된 파일:
-  claude-progress.txt
-  feature_list.json
+  .claude/claude-progress.txt
+  .claude/feature_list.json
 
 pre-commit hook: [설치 완료 / 이미 설치됨 / .git 없음]
 

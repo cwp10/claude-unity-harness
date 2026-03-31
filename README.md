@@ -115,7 +115,7 @@ claude-unity-harness/
 
 | 이벤트 | 동작 |
 |--------|------|
-| **SessionStart** | `project-memory.json` → `claude-progress.txt` → `feature_list.json` 순으로 컨텍스트를 자동 주입 |
+| **SessionStart** | `project-memory.json` → `.claude/claude-progress.txt` → `.claude/feature_list.json` 순으로 컨텍스트를 자동 주입 |
 | **UserPromptSubmit** | 첫 번째 메시지 전에 컨텍스트가 없으면 동일하게 자동 주입 (SessionStart 누락 보정) |
 | **SessionEnd** | `.context_loaded` 플래그 삭제 — 다음 세션에서 컨텍스트가 다시 로드될 수 있도록 초기화 |
 | **PreToolUse (Write/Edit)** | `.cs` 파일 수정 직전마다 Unity C# 핵심 규칙(m\_ 접두사, Allman 중괄호 등) 자동 주입 |
@@ -125,8 +125,8 @@ claude-unity-harness/
 
 자동 주입된 컨텍스트를 **사람이 읽기 좋은 형태로 정리**하고 다음 작업을 제안합니다.
 
-1. `project-memory.json` + `claude-progress.txt` 내용 정리 출력
-2. `feature_list.json`에서 `passes: false` 항목 확인 — 다음 할 작업 파악
+1. `project-memory.json` + `.claude/claude-progress.txt` 내용 정리 출력
+2. `.claude/feature_list.json`에서 `passes: false` 항목 확인 — 다음 할 작업 파악
 3. `git log --oneline -10`으로 최근 커밋 이력 확인
 4. "1번 작업부터 시작할까요?" 질문
 
@@ -143,9 +143,9 @@ claude-unity-harness/
 작업을 마칠 때 실행합니다. 파일 저장과 git 커밋까지 처리합니다.
 
 1. 현재 대화에서 완료된 작업·미완료 작업·설계 결정·발견된 문제를 추출합니다.
-2. `claude-progress.txt` 업데이트 — 세션 이력 테이블에 오늘 항목 추가, 다음 작업 갱신.
+2. `.claude/claude-progress.txt` 업데이트 — 세션 이력 테이블에 오늘 항목 추가, 다음 작업 갱신.
 3. `.claude/project-memory.json` 업데이트 — 기술 스택·현재 기능·결정 이력(append) 갱신.
-4. `feature_list.json`에서 `passes: true`로 변경된 항목 확인 + 전체 진행률 반영.
+4. `.claude/feature_list.json`에서 `passes: true`로 변경된 항목 확인 + 전체 진행률 반영.
 5. 변경사항이 있으면 자동 `git commit` — 세션 내용에 따라 커밋 타입 자동 선택:
 
 | 세션 내용 | 커밋 타입 |
@@ -158,7 +158,7 @@ claude-unity-harness/
 
 ```
 /context-save
-→ claude-progress.txt 업데이트
+→ .claude/claude-progress.txt 업데이트
 → project-memory.json 업데이트
 → git commit: "[feat] 인벤토리 시스템 기본 구조 구현"
 → "다음 세션에서 컨텍스트가 자동 로드됩니다"
@@ -178,7 +178,7 @@ claude-unity-harness/
    - 구현 로드맵
    - 대안 2가지 + 트레이드오프
 3. 플랜 승인 대기 — **승인 전에는 코드를 작성하지 않습니다.**
-4. 승인 시: `docs/architecture/기능명-설계.md` 저장 + `feature_list.json`에 `passes: false`로 항목 추가.
+4. 승인 시: `docs/architecture/기능명-설계.md` 저장 + `.claude/feature_list.json`에 `passes: false`로 항목 추가.
 5. 단계별 코드 구현 시작.
 
 ```
@@ -288,10 +288,10 @@ git commit --no-verify -m "[hotfix] 긴급 수정"
 
 ```
 1. /setup
-   Unity 버전·스택 설정, hook 설치, feature_list.json 생성
+   Unity 버전·스택 설정, hook 설치, .claude/feature_list.json 생성
 
 2. /deep-interview
-   요구사항 구조화 + feature_list.json 항목 채우기
+   요구사항 구조화 + .claude/feature_list.json 항목 채우기
 ```
 
 ### 매 작업 세션 흐름
@@ -299,10 +299,10 @@ git commit --no-verify -m "[hotfix] 긴급 수정"
 ```
 세션 시작 (자동)
   Claude Code 대화 열기
-  → SessionStart hook: project-memory.json · claude-progress.txt 자동 주입
+  → SessionStart hook: project-memory.json · .claude/claude-progress.txt 자동 주입
   → 필요 시 /context-load 로 복구 요약 + 다음 작업 제안
 
-기능 개발 (feature_list.json의 passes: false 항목 1개씩)
+기능 개발 (.claude/feature_list.json의 passes: false 항목 1개씩)
   /plan 기능명
   → 설계 플랜 확인 + 승인
   → 코드 구현 (PreToolUse hook: Unity C# 규칙 자동 주입)
@@ -318,7 +318,7 @@ git commit --no-verify -m "[hotfix] 긴급 수정"
 
 세션 종료
   /context-save
-  → claude-progress.txt + project-memory.json 업데이트
+  → .claude/claude-progress.txt + project-memory.json 업데이트
   → git commit (세션 내용 자동 커밋)
   대화 닫기
   → SessionEnd hook: 다음 세션 컨텍스트 로드 플래그 초기화

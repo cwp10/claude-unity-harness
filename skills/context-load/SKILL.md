@@ -1,7 +1,7 @@
 ---
 name: context-load
 description: >
-  Loads session context by reading .claude/project-memory.json, claude-progress.txt, and git history.
+  Loads session context by reading .claude/project-memory.json, .claude/claude-progress.txt, and git history.
   Usage: /context-load
   Runs the standard session startup routine: read project memory, check git log,
   verify current state, then present what to work on next.
@@ -27,13 +27,13 @@ pwd
 
 `.claude/project-memory.json` Read (있으면 — 가장 구조화된 컨텍스트).
 
-없으면 → `claude-progress.txt` Read.
+없으면 → `.claude/claude-progress.txt` Read.
 
 둘 다 없으면 → "/setup 으로 프로젝트를 초기화하세요." 출력 후 종료.
 
-### 3단계: feature_list.json 읽기
+### 3단계: .claude/feature_list.json 읽기
 
-`feature_list.json` 파일 Read (있으면).
+`.claude/feature_list.json` 파일 Read (있으면).
 passes: false 인 항목 수와 다음 작업할 기능 확인.
 
 ### 4단계: git 이력 확인
@@ -47,19 +47,19 @@ git log --oneline -10 2>/dev/null || echo "git 이력 없음"
 ## 세션 복구 완료
 
 ### 마지막 작업
-(claude-progress.txt 의 세션 이력 최근 항목)
+(.claude/claude-progress.txt 의 세션 이력 최근 항목)
 
 ### 현재 진행 상황
-(claude-progress.txt 의 현재 진행 상황)
+(.claude/claude-progress.txt 의 현재 진행 상황)
 
 ### 최근 커밋
 (git log 결과)
 
 ### 다음 작업
-(feature_list.json 의 passes: false 중 최우선 항목)
+(.claude/feature_list.json 의 passes: false 중 최우선 항목)
 
 ### 알려진 이슈
-(claude-progress.txt 의 알려진 이슈)
+(.claude/claude-progress.txt 의 알려진 이슈)
 ```
 
 ### 6단계: 작업 재개 제안

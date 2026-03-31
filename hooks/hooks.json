@@ -6,7 +6,7 @@
         "hooks": [
           {
             "type": "command",
-            "command": "if [ -f .claude/project-memory.json ]; then echo '=== [claude-unity-harness] 프로젝트 메모리 ===' && cat .claude/project-memory.json; elif [ -f claude-progress.txt ]; then echo '=== [claude-unity-harness] 세션 컨텍스트 ===' && cat claude-progress.txt; elif [ -f feature_list.json ]; then echo '=== [claude-unity-harness] 기능 목록 ===' && cat feature_list.json; fi"
+            "command": "if [ -f .claude/project-memory.json ]; then echo '=== [claude-unity-harness] 프로젝트 메모리 ===' && cat .claude/project-memory.json; elif [ -f .claude/claude-progress.txt ]; then echo '=== [claude-unity-harness] 세션 컨텍스트 ===' && cat .claude/claude-progress.txt; elif [ -f .claude/feature_list.json ]; then echo '=== [claude-unity-harness] 기능 목록 ===' && cat .claude/feature_list.json; fi"
           }
         ]
       }
@@ -17,7 +17,7 @@
         "hooks": [
           {
             "type": "command",
-            "command": "mkdir -p .claude && if [ ! -f .claude/.context_loaded ]; then if [ -f .claude/project-memory.json ]; then echo '=== [claude-unity-harness] 프로젝트 메모리 ===' && cat .claude/project-memory.json; elif [ -f claude-progress.txt ]; then echo '=== [claude-unity-harness] 세션 컨텍스트 ===' && cat claude-progress.txt; elif [ -f feature_list.json ]; then echo '=== [claude-unity-harness] 기능 목록 ===' && cat feature_list.json; fi; touch .claude/.context_loaded; fi"
+            "command": "mkdir -p .claude && if [ ! -f .claude/.context_loaded ]; then if [ -f .claude/project-memory.json ]; then echo '=== [claude-unity-harness] 프로젝트 메모리 ===' && cat .claude/project-memory.json; elif [ -f .claude/claude-progress.txt ]; then echo '=== [claude-unity-harness] 세션 컨텍스트 ===' && cat .claude/claude-progress.txt; elif [ -f .claude/feature_list.json ]; then echo '=== [claude-unity-harness] 기능 목록 ===' && cat .claude/feature_list.json; fi; touch .claude/.context_loaded; fi"
           }
         ]
       }

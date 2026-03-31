@@ -63,6 +63,6 @@ architect-planner 의 설계 플랜을 그대로 출력한다.
 
 승인 시:
 1. architect-planner 가 docs/architecture/기능명-설계.md 자동 저장
-2. feature_list.json 에 해당 기능 항목 추가 (`passes: false` 로 시작)
+2. .claude/feature_list.json 에 해당 기능 항목 추가 (`passes: false` 로 시작)
 3. "코드 구현을 시작할까요?" 확인
 4. 확인 시 메인 Claude가 구현 플랜대로 단계별 코드 생성

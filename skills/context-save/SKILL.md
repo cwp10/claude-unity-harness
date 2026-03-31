@@ -1,7 +1,7 @@
 ---
 name: context-save
 description: >
-  Saves the current session's progress to claude-progress.txt and .claude/project-memory.json, then commits to git.
+  Saves the current session's progress to .claude/claude-progress.txt and .claude/project-memory.json, then commits to git.
   Usage: /context-save
   Updates both the human-readable progress log and the structured project memory JSON.
   Commits all changes with a descriptive message.
@@ -28,7 +28,7 @@ git diff --stat 2>/dev/null || echo ""
 git status --short 2>/dev/null || echo ""
 ```
 
-기존 `claude-progress.txt` 읽기 (있으면).
+기존 `.claude/claude-progress.txt` 읽기 (있으면).
 
 ### 2단계: 이번 세션 작업 파악
 
@@ -56,12 +56,12 @@ UnityMCP 툴 사용 가능 여부에 따라 분기한다.
 
 - `[MCP 미연결] 테스트 생략 — 커밋을 진행합니다.` 출력 후 3단계로 진행
 
-### 3단계: claude-progress.txt 업데이트
+### 3단계: .claude/claude-progress.txt 업데이트
 
 기존 파일이 있으면 업데이트, 없으면 새로 생성:
 
 ```
-# claude-progress.txt
+# .claude/claude-progress.txt
 
 ## 프로젝트 정보
 프로젝트: [프로젝트명]
@@ -119,12 +119,12 @@ UnityMCP 툴 사용 가능 여부에 따라 분기한다.
 기존 파일이 있으면 필드를 병합 업데이트 (decisions 배열은 append).
 ProjectSettings/ProjectVersion.txt 에서 Unity 버전 읽어 techStack 채우기.
 
-### 3.6단계: feature_list.json 업데이트
+### 3.6단계: .claude/feature_list.json 업데이트
 
-`feature_list.json` 파일 Read 후:
+`.claude/feature_list.json` 파일 Read 후:
 - 이번 세션에서 passes: true 로 변경된 항목 확인 및 저장
 - 새로 추가된 기능 항목 확인
-- 전체 진행률 계산 후 claude-progress.txt 에 반영:
+- 전체 진행률 계산 후 .claude/claude-progress.txt 에 반영:
   ```
   진행률: N/M 기능 완료 (passes: true)
   ```

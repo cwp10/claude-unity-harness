@@ -229,7 +229,7 @@ interface, abstract class, virtual 메서드 목록
 - `ProjectSettings/ProjectSettings.asset` → 번들 ID, 버전
 - `Packages/packages-lock.json` → 사용 패키지
 - `Builds/` 폴더 확인
-- `feature_list.json` → 구현 기능 목록
+- `.claude/feature_list.json` → 구현 기능 목록
 - `git log --oneline -20` → 최근 작업 내역
 
 ### 2단계: 문서 생성

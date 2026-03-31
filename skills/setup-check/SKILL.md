@@ -32,9 +32,9 @@ keywords: [setup, check, doctor, diagnose, install, health]
 
 ### 3. 하네스 파일
 ```bash
-[ -f feature_list.json ] && echo "OK" || echo "MISSING"
+[ -f .claude/feature_list.json ] && echo "OK" || echo "MISSING"
 [ -f .claude/project-memory.json ] && echo "OK" || echo "MISSING"
-[ -f claude-progress.txt ] && echo "OK" || echo "MISSING"
+[ -f .claude/claude-progress.txt ] && echo "OK" || echo "MISSING"
 ```
 
 ### 4. Unity 프로젝트 구조
@@ -63,9 +63,9 @@ cat ProjectSettings/ProjectVersion.txt 2>/dev/null | grep "m_EditorVersion" || e
 |------|------|------|
 | pre-commit hook | ✅/❌ | |
 | CLAUDE.md 스택 규칙 | ✅/⚠️ | engines/unity.md 활성화 여부 |
-| feature_list.json | ✅/❌ | |
-| project-memory.json | ✅/⚠️ | 없으면 /context-save 로 생성 |
-| claude-progress.txt | ✅/⚠️ | |
+| .claude/feature_list.json | ✅/❌ | |
+| .claude/project-memory.json | ✅/⚠️ | 없으면 /context-save 로 생성 |
+| .claude/claude-progress.txt | ✅/⚠️ | |
 | Unity 폴더 구조 | ✅/⚠️ | Assets/_Project/Scripts/ |
 | Unity 버전 | ✅/⚠️ | [버전] |
 | .gitignore | ✅/⚠️ | Library/ 제외 여부 |

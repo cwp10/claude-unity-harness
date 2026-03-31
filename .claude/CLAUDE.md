@@ -18,7 +18,7 @@ Unity(게임·산업·교육) 프로젝트 운영.
 
 ## 점진적 진행 원칙
 한 번에 1개 기능만 작업한다:
-1. feature_list.json 에서 passes: false 인 항목 중 가장 높은 우선순위 1개 선택
+1. .claude/feature_list.json 에서 passes: false 인 항목 중 가장 높은 우선순위 1개 선택
 2. 해당 기능 구현 완료 및 검증
 3. passes: true 로 변경 후 /context-save 실행
 4. 다음 기능으로 이동
