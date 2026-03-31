@@ -2,13 +2,13 @@
 name: debugger
 description: >
   Diagnoses bugs and errors in Unity C# code by analyzing stack traces and related code.
-  Use when user runs /debug or reports an error with a stack trace or file path.
+  Use when user runs /fix or reports an error with a stack trace or file path.
   Provides root cause analysis and corrected code. Applies fix with user approval.
   Do NOT use for code review or new feature development.
 tools: Read, Glob, Grep, Bash, Write, Edit
 model: sonnet
 permissionMode: acceptEdits
-useWhen: Unity C# 오류 메시지, 스택 트레이스, NullReferenceException 등 버그 진단·수정이 필요할 때. /debug 스킬이 위임할 때.
+useWhen: Unity C# 오류 메시지, 스택 트레이스, NullReferenceException 등 버그 진단·수정이 필요할 때. /fix 스킬이 위임할 때.
 avoidWhen: 새 기능 개발, 코드 리뷰, 리팩토링, 아키텍처 설계. 오류 없는 코드 개선 요청.
 ---
 

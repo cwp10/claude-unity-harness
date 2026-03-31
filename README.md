@@ -32,7 +32,7 @@ Unity 프로젝트를 위한 Claude Code 플러그인.
 | `/review [파일]` | 코드 리뷰 |
 | `/audit` | 전체 감사 + 빌드 체크 |
 | `/refactor [대상]` | 리팩토링 플랜 + 실행 |
-| `/debug [오류]` | 버그 진단 + 수정 |
+| `/fix [오류]` | 버그 진단 + 수정 |
 | `/analyze [대상]` | 코드·시스템 분석 |
 | `/git-summary` | 커밋 메시지 제안 |
 | `/doc readme\|handover\|delivery` | 문서 생성 |
@@ -61,7 +61,7 @@ claude-unity-harness/
 │   ├── review/              코드 리뷰
 │   ├── refactor/            리팩토링 플랜 + 실행
 │   ├── audit/               전체 감사
-│   ├── debug/               버그 진단
+│   ├── fix/                 버그 진단
 │   ├── analyze/             코드 분석
 │   ├── doc/                 문서 생성 (readme · handover · delivery)
 │   ├── git-summary/         커밋 메시지 제안
