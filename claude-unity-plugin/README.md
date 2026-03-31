@@ -18,8 +18,8 @@ Unity 프로젝트를 위한 Claude Code CLI 전용 플러그인.
 | `/context-load` | haiku | 세션 시작 — project-memory.json + 진행 상황 복구 |
 | `/context-save` | haiku | 세션 종료 — project-memory.json + 진행 상황 저장 + 커밋 |
 | `/plan [기능명]` | opus | 설계 플랜 생성 (codebase-explorer → architect-planner) |
-| `/review [파일]` | opus | 코드 리뷰 (codebase-explorer → unity-reviewer) |
-| `/audit` | opus | 전체 감사 (코드 품질 + 빌드 체크 병렬 실행) |
+| `/review [파일]` | sonnet | 코드 리뷰 (codebase-explorer → unity-reviewer) |
+| `/audit` | sonnet | 전체 감사 (코드 품질 + 빌드 체크 병렬 실행) |
 | `/refactor [대상]` | opus | 리팩토링 플랜 + 단계별 실행 |
 | `/debug [오류]` | sonnet | 버그 진단 + 수정 (debugger 에이전트) |
 | `/analyze [대상]` | sonnet | 코드·시스템 분석 → docs/analysis/ 저장 |
@@ -74,10 +74,9 @@ claude plugin install claude-unity.plugin
 
 ### pre-commit hook
 
-`/setup` 실행 시 자동 설치됩니다. 수동 설치:
+`/setup` 실행 시 자동 설치됩니다. 재설치가 필요하면:
 ```bash
-cp .claude/hooks/pre-commit .git/hooks/pre-commit
-chmod +x .git/hooks/pre-commit
+/setup --force
 ```
 
 ---
@@ -165,7 +164,6 @@ git commit 시 자동 실행
 - Claude Code CLI
 - Unity 6 LTS (6000.0.x)
 - Git Bash (Windows)
-- Python 3 (hooks.json의 PreToolUse / PostToolUse 훅 동작에 필요)
 - `claude` CLI가 PATH에 등록 (pre-commit 리뷰 동작에 필요)
 
 ---
@@ -189,7 +187,7 @@ claude-unity-plugin/
 │   ├── debugger.md
 │   ├── doc-writer.md
 │   ├── verifier.md
-│   └── critic.md            ← NEW: 대안·최적화 비판 에이전트
+│   └── critic.md
 └── hooks/
     ├── hooks.json           ← Claude Code 훅 (SessionStart/End, UserPromptSubmit, PreToolUse, PostToolUse)
     └── pre-commit           ← Git pre-commit 스크립트
