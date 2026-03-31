@@ -1,6 +1,9 @@
 # 빌드 산출물 (claude-unity-plugin/ 소스에서 생성)
 *.plugin
 
+# Claude Code 로컬 설정 (사용자별 상이)
+.claude/settings.local.json
+
 # Unity 컴파일 임시 로그
 .claude/compile_*.log
 
