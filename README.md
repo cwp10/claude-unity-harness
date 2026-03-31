@@ -10,7 +10,7 @@ Unity 프로젝트를 위한 Claude Code 플러그인.
 
 ```
 /plugin marketplace add https://github.com/cwp10/claude-unity-harness
-/plugin install claude-unity-harness@claude-unity
+/plugin install claude-unity-harness@claude-unity-harness
 ```
 
 설치 후 Unity 프로젝트 루트에서 최초 1회 실행:
