@@ -1,0 +1,8 @@
+# 빌드 산출물 (claude-unity-plugin/ 소스에서 생성)
+*.plugin
+
+# Unity 컴파일 임시 로그
+.claude/compile_*.log
+
+# install.ps1 백업 폴더
+.claude_backup_*/

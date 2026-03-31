@@ -1,0 +1,34 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(powershell -Command \"Remove-Item -Recurse -Force ''D:\\\\workspace\\\\claude-unity-harness\\\\claude-unity-setup\\\\.claude\\\\skills\\\\web-patterns'', ''D:\\\\workspace\\\\claude-unity-harness\\\\claude-unity-setup\\\\.claude\\\\skills\\\\web-review-rules''\")",
+      "Bash(SRC=\"D:/workspace/claude-unity-harness/claude-unity-setup/.claude\")",
+      "Bash(DST=\"D:/workspace/claude-unity-harness/claude-unity-plugin\")",
+      "Bash(mkdir -p \"$DST/skills/unity-patterns/references\")",
+      "Bash(mkdir -p \"$DST/skills/unity-review-rules/references\")",
+      "Bash(mkdir -p \"$DST/skills/git-workflow\")",
+      "Bash(cp \"$SRC/rules/response.md\" \"$DST/rules/response.md\")",
+      "Bash(cp \"$SRC/rules/git.md\" \"$DST/rules/git.md\")",
+      "Bash(cp \"$SRC/rules/code-review.md\" \"$DST/rules/code-review.md\")",
+      "Bash(cp \"$SRC/engines/unity.md\" \"$DST/engines/unity.md\")",
+      "Bash(cp \"$SRC/languages/csharp.md\" \"$DST/languages/csharp.md\")",
+      "Bash(SRC=\"D:/workspace/claude-unity-harness/claude-unity-setup/.claude/skills\")",
+      "Bash(DST=\"D:/workspace/claude-unity-harness/claude-unity-plugin/skills\")",
+      "Bash(cp \"$SRC/unity-patterns/SKILL.md\" \"$DST/unity-patterns/SKILL.md\")",
+      "Bash(cp \"$SRC/unity-patterns/references/solid-principles.md\" \"$DST/unity-patterns/references/solid-principles.md\")",
+      "Bash(cp \"$SRC/unity-patterns/references/advanced-patterns.md\" \"$DST/unity-patterns/references/advanced-patterns.md\")",
+      "Bash(SRC=\"D:/workspace/claude-unity-harness/claude-unity-setup/.claude/agents\")",
+      "Bash(DST=\"D:/workspace/claude-unity-harness/claude-unity-plugin/agents\")",
+      "Bash(cp \"$SRC/unity-reviewer.md\" \"$DST/unity-reviewer.md\")",
+      "Bash(cp \"$SRC/architect-planner.md\" \"$DST/architect-planner.md\")",
+      "Bash(cp \"$SRC/codebase-explorer.md\" \"$DST/codebase-explorer.md\")",
+      "Bash(zip -r /tmp/claude-unity.plugin . -x \"*.DS_Store\")",
+      "Bash(cp /tmp/claude-unity.plugin \"D:/workspace/claude-unity-harness/claude-unity.plugin\")",
+      "Bash(powershell -Command \"Compress-Archive -Path ''claude-unity-plugin/*'' -DestinationPath ''claude-unity.plugin'' -Force\")",
+      "Bash(powershell -Command \"Compress-Archive -Path ''claude-unity-plugin/*'' -DestinationPath ''/tmp/claude-unity.zip'' -Force\")",
+      "Bash(cp /tmp/claude-unity.zip \"D:/workspace/claude-unity-harness/claude-unity.plugin\")",
+      "Bash(powershell -Command \"Compress-Archive -Path ''claude-unity-plugin\\\\*'' -DestinationPath ''D:\\\\workspace\\\\claude-unity-harness\\\\claude-unity-temp.zip'' -Force\")",
+      "Bash(mv \"D:/workspace/claude-unity-harness/claude-unity-temp.zip\" \"D:/workspace/claude-unity-harness/claude-unity.plugin\")"
+    ]
+  }
+}
