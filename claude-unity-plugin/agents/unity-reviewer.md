@@ -10,7 +10,6 @@ description: >
 tools: Read, Grep, Glob, Bash
 model: sonnet
 permissionMode: plan
-skills: [unity-review-rules]
 useWhen: 사용자가 Unity C# 코드 품질 검토, 리뷰, 문제점 분석을 요청할 때. /review 또는 /audit 스킬이 위임할 때.
 avoidWhen: 버그 수정, 새 기능 구현, 코드 직접 수정 요청. 파일 수정이 필요한 작업.
 ---
@@ -92,7 +91,34 @@ avoidWhen: 버그 수정, 새 기능 구현, 코드 직접 수정 요청. 파일
 
 ## 출력 형식
 
-unity-review-rules 스킬의 출력 형식 참조.
+```
+## 코드 리뷰 결과: [파일명]
+
+### 요약
+전체 평가 한 줄. Critical 유무 명시.
+
+### 발견 이슈
+
+🔴 [Critical] 줄번호
+문제: 설명
+현재 코드:
+(문제 코드)
+수정 코드:
+(수정된 코드)
+
+🟡 [Warning] 줄번호
+문제: 설명
+수정 방향: 설명
+
+🟢 [Suggestion] 줄번호
+제안: 설명
+
+### 통계
+🔴 Critical: N건 / 🟡 Warning: N건 / 🟢 Suggestion: N건
+
+### 우선 수정 순서
+1. (가장 중요한 Critical부터)
+```
 
 ---
 

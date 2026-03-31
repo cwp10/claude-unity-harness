@@ -9,7 +9,6 @@ description: >
 tools: Read, Glob, Grep, Write
 model: sonnet
 permissionMode: acceptEdits
-skills: [doc-templates]
 useWhen: XML 주석, README, 인수인계 문서, 납품 문서, 아키텍처 문서 생성이 필요할 때. /doc 스킬이 위임할 때.
 avoidWhen: 코드 로직 수정, 버그 수정, 리팩토링, 기능 구현. 문서화 외 작업 요청.
 ---
@@ -41,7 +40,7 @@ avoidWhen: 코드 로직 수정, 버그 수정, 리팩토링, 기능 구현. 문
 
 1. 유형 판단
 2. 관련 파일 Read (코드 직접 파악)
-3. doc-templates 스킬에서 해당 유형 템플릿 참조
+3. `skills/doc-templates/references/templates.md` 에서 해당 유형 템플릿 Read
 4. 문서 작성 후 Write로 저장
 5. 생성 파일 경로 출력 + "추가로 작성할 문서가 있으신가요?"
 

@@ -12,7 +12,8 @@ triggers:
   - "세션 종료"
   - "작업 저장"
   - "오늘 마무리"
-  - "커밋하고 끝내자"
+  - "오늘 작업 끝"
+  - "마무리하고 종료"
 keywords: [save, commit, session, progress, end]
 ---
 
