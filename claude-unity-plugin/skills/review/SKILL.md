@@ -8,7 +8,7 @@ description: >
   Example: /review Assets/_Project/Scripts/Game/PlayerController.cs
   If no file specified, auto-detects recently changed .cs files.
 allowed-tools: Read, Grep, Glob, Bash, Write
-cost: opus
+cost: sonnet
 triggers:
   - "리뷰해줘"
   - "코드 검토"
@@ -103,5 +103,14 @@ keywords: [review, code-quality, unity, csharp, critique]
 
 | 결과 | 처리 |
 |------|------|
-| Critical 0건 | feature_list.json 해당 기능 `passes: true` 로 변경 후 완료 보고 |
-| Critical 1건 이상 | `passes: false` 유지 + 커밋 차단 안내 + 우선 수정 항목 목록 출력 |
+| Critical 0건 | `verifier` 에이전트로 최종 스펙 검증 후 passes:true 처리 권장 |
+| Critical 1건 이상 | `passes: false` 유지 + 우선 수정 항목 목록 출력 |
+
+### 6단계: critic 제안
+
+Critical 0건인 경우, 리뷰 완료 후 아래 메시지를 출력한다:
+
+```
+리뷰 완료. Critical 이슈 없음.
+더 나은 구현 방법이나 성능 최적화 관점이 궁금하다면 "critic 돌려줘" 또는 "더 나은 방법 없어?" 라고 말해주세요.
+```

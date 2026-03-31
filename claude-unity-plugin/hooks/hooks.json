@@ -38,7 +38,7 @@
         "hooks": [
           {
             "type": "command",
-            "command": "python3 -c \"import sys,json,os; d=json.load(sys.stdin); f=d.get('tool_input',{}).get('file_path',''); print('[claude-unity] ⚠️ .meta 파일 없음: ' + f + '.meta\\n→ Unity Editor를 열어 자동 생성하거나 pre-commit hook이 처리합니다.') if f.endswith('.cs') and not os.path.exists(f + '.meta') else None\" 2>/dev/null || true"
+            "command": "FILE=$(echo \"$CLAUDE_TOOL_INPUT\" | grep -o '\"file_path\"[[:space:]]*:[[:space:]]*\"[^\"]*\"' | grep -o '\"[^\"]*\"$' | tr -d '\"' 2>/dev/null || true); if echo \"$FILE\" | grep -q '\\.cs$' && [ -n \"$FILE\" ] && [ ! -f \"${FILE}.meta\" ]; then echo \"[claude-unity] ⚠️ .meta 파일 없음: ${FILE}.meta → Unity Editor를 열어 자동 생성하거나 pre-commit hook이 처리합니다.\"; fi"
           }
         ]
       }
@@ -49,7 +49,7 @@
         "hooks": [
           {
             "type": "command",
-            "command": "python3 -c \"import sys,json; d=json.load(sys.stdin); f=d.get('file_path',''); sys.stdout.write('=== [claude-unity] Unity C# 규칙 ===\\n- private 필드: m_ 접두사 (m_health)\\n- 상수: k_ 접두사 (k_MaxCount)\\n- 정적: s_ 접두사 (s_instance)\\n- 중괄호: Allman 스타일 (여는 중괄호 새 줄)\\n- Update()에서 GetComponent 호출 금지 → Awake에서 캐싱\\n- public 필드 직접 노출 금지 → [SerializeField] private 사용\\n- OnDisable/OnDestroy에서 이벤트 구독 해제 필수\\n') if f.endswith('.cs') else None\" 2>/dev/null || true"
+            "command": "FILE=$(echo \"$CLAUDE_TOOL_INPUT\" | grep -o '\"file_path\"[[:space:]]*:[[:space:]]*\"[^\"]*\"' | grep -o '\"[^\"]*\"$' | tr -d '\"' 2>/dev/null || true); if echo \"$FILE\" | grep -q '\\.cs$'; then printf '=== [claude-unity] Unity C# 규칙 ===\\n- private 필드: m_ 접두사 (m_health)\\n- 상수: k_ 접두사 (k_MaxCount)\\n- 정적: s_ 접두사 (s_instance)\\n- 중괄호: Allman 스타일 (여는 중괄호 새 줄)\\n- Update()에서 GetComponent 호출 금지 → Awake에서 캐싱\\n- public 필드 직접 노출 금지 → [SerializeField] private 사용\\n- OnDisable/OnDestroy에서 이벤트 구독 해제 필수\\n'; fi"
           }
         ]
       }

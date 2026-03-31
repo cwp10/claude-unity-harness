@@ -6,7 +6,7 @@ description: >
   Unity: code quality audit (unity-reviewer) + .meta files, compile errors, folder structure.
   Both tasks run concurrently.
 allowed-tools: Read, Glob, Grep, Bash, Write
-cost: opus
+cost: sonnet
 triggers:
   - "전체 감사"
   - "빌드 체크"
@@ -85,7 +85,8 @@ grep -rn "CS[0-9]\{4\}" . --include="*.cs" 2>/dev/null | head -20
 
 | 결과 | 처리 |
 |------|------|
-| 🔴 필수 수정 0건 | feature_list.json 해당 기능 `passes: true` 로 변경 후 완료 보고 |
-| 🔴 필수 수정 1건 이상 | `passes: false` 유지 + 커밋 차단 안내 + 우선 수정 항목 목록 출력 |
+| 🔴 필수 수정 0건 | "verifier 에이전트로 최종 검증 후 passes:true 처리를 권장합니다" 안내 |
+| 🔴 필수 수정 1건 이상 | `passes: false` 유지 + 우선 수정 항목 목록 출력 |
 
+> passes:true 변경은 verifier 에이전트만 수행한다. /audit은 품질 게이트 역할만 한다.
 > 🟡 권장 수정은 passes 판정에 영향을 주지 않는다.

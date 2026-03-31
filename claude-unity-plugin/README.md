@@ -30,21 +30,19 @@ Unity 프로젝트를 위한 Claude Code CLI 전용 플러그인.
 
 | 스킬 | 참조처 |
 |------|--------|
-| `unity-patterns` | architect-planner 에이전트 |
-| `unity-review-rules` | unity-reviewer 에이전트 (references/checklist.md) |
-| `architect-output` | architect-planner 에이전트 |
-| `doc-templates` | doc-writer 에이전트 (references/templates.md) |
+| `unity-patterns` | architect-planner 에이전트, /plan 스킬 |
 
 ### Agents (스킬에서 위임 호출)
 
-| 에이전트 | model | 호출처 |
-|----------|-------|--------|
-| `unity-reviewer` | sonnet | /review, /audit |
-| `architect-planner` | opus | /plan, /refactor |
-| `codebase-explorer` | haiku | /plan, /review, /refactor, /analyze |
-| `debugger` | sonnet | /debug |
-| `doc-writer` | sonnet | /doc |
-| `verifier` | sonnet | 기능 구현 완료 후 자동 검증 |
+| 에이전트 | model | 역할 | 호출처 |
+|----------|-------|------|--------|
+| `unity-reviewer` | sonnet | Unity C# 코드 독립 리뷰 (Critical/Warning/Suggestion) | /review, /audit |
+| `architect-planner` | opus | 설계 플랜 생성 + 승인 후 docs/architecture/ 저장 | /plan, /refactor |
+| `codebase-explorer` | haiku | 코드베이스 구조 탐색 및 관련 파일 수집 | /plan, /review, /refactor, /analyze |
+| `debugger` | sonnet | 버그 진단 + 수정 코드 제안 | /debug |
+| `doc-writer` | sonnet | XML 주석·README·인수인계·납품 문서 생성 | /doc |
+| `verifier` | sonnet | 기능 구현 완료 후 스펙 충족 검증 → passes:true | 기능 구현 완료 후 |
+| `critic` | sonnet | 악마의 변호인 — GC/드로우콜/설계 관점 대안 제시 | /review 후, 최적화 요청 시 |
 
 ### Hooks (자동 실행)
 
@@ -52,6 +50,7 @@ Unity 프로젝트를 위한 Claude Code CLI 전용 플러그인.
 |--------|------|
 | `SessionStart` | project-memory.json → claude-progress.txt 순으로 자동 로드 |
 | `UserPromptSubmit` | 첫 메시지 시 컨텍스트 로드 (SessionStart 폴백, 중복 방지) |
+| `SessionEnd` | .context_loaded 플래그 제거 → 다음 세션 컨텍스트 로드 준비 |
 | `PreToolUse (Write\|Edit *.cs)` | Unity C# 네이밍·코딩 규칙 컨텍스트 주입 |
 | `PostToolUse (Write *.cs)` | 신규 .cs 파일 생성 시 .meta 누락 경고 |
 | `pre-commit (git hook)` | .meta 확인 → 컴파일 → 코드 리뷰 → 문서 자동화 |
@@ -96,11 +95,13 @@ chmod +x .git/hooks/pre-commit
   → 코드 작성 (PreToolUse hook: C# 규칙 자동 주입)
   →           (PostToolUse hook: .meta 누락 자동 경고)
   → /review [파일]              (코드 리뷰)
+  → critic 에이전트             (대안·최적화 탐색 — 선택)
   → verifier 에이전트           (스펙 충족 검증 → passes: true)
   → /audit                      (전체 감사 — 배포 전)
 
 세션 종료
   → /context-save               (project-memory.json + git 커밋)
+  → SessionEnd hook 자동 실행  (.context_loaded 플래그 제거)
 
 git commit 시 자동 실행
   → pre-commit hook
@@ -114,8 +115,8 @@ git commit 시 자동 실행
 
 ## 트리거 키워드 (자연어 자동 매칭)
 
-| 말하면 | 실행되는 스킬 |
-|--------|--------------|
+| 말하면 | 실행되는 스킬/에이전트 |
+|--------|----------------------|
 | "에러", "버그", "NullReferenceException" | `/debug` |
 | "리뷰해줘", "코드 검토", "문제 있어?" | `/review` |
 | "설계해줘", "플랜 짜줘", "구조 잡아줘" | `/plan` |
@@ -128,12 +129,13 @@ git commit 시 자동 실행
 | "오늘 마무리", "작업 저장" | `/context-save` |
 | "요구사항 정리", "뭘 만들어야 할지" | `/deep-interview` |
 | "설치 확인", "환경 점검" | `/setup-check` |
+| "더 나은 방법 없어?", "최적화 방법", "이게 최선이야?" | `critic 에이전트` |
 
 ---
 
 ## 프로젝트 메모리 구조 (.claude/project-memory.json)
 
-OMC의 project-memory.json 패턴 적용. `/context-save` 시 자동 생성·업데이트.
+`/context-save` 시 자동 생성·업데이트.
 
 ```json
 {
@@ -174,14 +176,21 @@ OMC의 project-memory.json 패턴 적용. `/context-save` 시 자동 생성·업
 claude-unity-plugin/
 ├── .claude-plugin/
 │   └── plugin.json          ← 플러그인 메타데이터
-├── CLAUDE.md                ← 플러그인 기본 컨텍스트
 ├── rules/                   ← 응답·Git·코드리뷰 규칙
 ├── engines/unity.md         ← Unity 6 스크립트 규칙
 ├── languages/csharp.md      ← C# 스타일 가이드
 ├── domains/unity.md         ← Unity 도메인 패턴
 ├── skills/                  ← 슬래시 커맨드 (13개)
-├── agents/                  ← 위임 에이전트 (6개)
+│   └── unity-patterns/      ← Unity 패턴 Reference Skill
+├── agents/                  ← 위임 에이전트 (7개)
+│   ├── unity-reviewer.md
+│   ├── architect-planner.md
+│   ├── codebase-explorer.md
+│   ├── debugger.md
+│   ├── doc-writer.md
+│   ├── verifier.md
+│   └── critic.md            ← NEW: 대안·최적화 비판 에이전트
 └── hooks/
-    ├── hooks.json           ← Claude Code 훅 (SessionStart, UserPromptSubmit, PreToolUse, PostToolUse)
+    ├── hooks.json           ← Claude Code 훅 (SessionStart/End, UserPromptSubmit, PreToolUse, PostToolUse)
     └── pre-commit           ← Git pre-commit 스크립트
 ```

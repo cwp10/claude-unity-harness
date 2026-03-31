@@ -50,5 +50,5 @@ grep -r "CS[0-9]\{4\}" . --include="*.cs" 2>/dev/null | head -5
 
 | 결과 | 처리 |
 |------|------|
-| 컴파일 오류 없음 | feature_list.json 해당 기능 `passes: true` 로 변경 + "/review 로 코드 품질 검증을 권장합니다" 안내 |
+| 컴파일 오류 없음 | `/review` 로 품질 검증 후 `verifier` 에이전트로 최종 passes:true 처리 권장 |
 | 컴파일 오류 있음 | `passes: false` 유지 + 오류 목록 출력 + debugger 재위임 |

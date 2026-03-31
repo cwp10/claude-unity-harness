@@ -86,5 +86,5 @@ grep -rn "CS[0-9]\{4\}" . --include="*.cs" 2>/dev/null | head -20
 
 | 결과 | 처리 |
 |------|------|
-| 오류 없음 | feature_list.json 해당 기능 `passes: true` 로 변경 + 완료 보고 |
+| 오류 없음 | `verifier` 에이전트로 최종 스펙 검증 후 passes:true 처리 권장 |
 | 오류 있음 | `passes: false` 유지 + 오류 목록 출력 + 수정 재진행 |
