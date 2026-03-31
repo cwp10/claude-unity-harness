@@ -38,7 +38,7 @@
         "hooks": [
           {
             "type": "command",
-            "command": "FILE=$(echo \"$CLAUDE_TOOL_INPUT\" | grep -o '\"file_path\"[[:space:]]*:[[:space:]]*\"[^\"]*\"' | grep -o '\"[^\"]*\"$' | tr -d '\"' 2>/dev/null || true); if echo \"$FILE\" | grep -q '\\.cs$' && [ -n \"$FILE\" ] && [ ! -f \"${FILE}.meta\" ]; then echo \"[claude-unity-harness] ⚠️ .meta 파일 없음: ${FILE}.meta → Unity Editor를 열어 자동 생성하거나 pre-commit hook이 처리합니다.\"; fi"
+            "command": "FILE=$(echo \"$CLAUDE_TOOL_INPUT\" | grep -o '\"file_path\"[[:space:]]*:[[:space:]]*\"[^\"]*\"' | grep -o '\"[^\"]*\"$' | tr -d '\"' 2>/dev/null || true); if echo \"$FILE\" | grep -q '\\.cs$' && [ -n \"$FILE\" ]; then if [ ! -f \"${FILE}.meta\" ]; then echo \"[claude-unity-harness] ⚠️ .meta 파일 없음: ${FILE}.meta → Unity Editor를 열어 자동 생성하거나 pre-commit hook이 처리합니다.\"; fi; MCP_OK=false; if command -v curl > /dev/null 2>&1 && curl -s --max-time 1 http://127.0.0.1:8080 > /dev/null 2>&1; then MCP_OK=true; elif command -v powershell > /dev/null 2>&1 && powershell -NoProfile -Command \"try{(New-Object System.Net.Sockets.TcpClient('127.0.0.1',8080)).Close();exit 0}catch{exit 1}\" 2>/dev/null; then MCP_OK=true; fi; if [ \"$MCP_OK\" = true ]; then echo \"[UNITY_MCP] .cs 파일 저장됨 — read_console 툴로 컴파일 에러를 확인하세요.\"; fi; fi"
           }
         ]
       }

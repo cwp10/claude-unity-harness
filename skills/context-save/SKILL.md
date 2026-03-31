@@ -6,7 +6,7 @@ description: >
   Updates both the human-readable progress log and the structured project memory JSON.
   Commits all changes with a descriptive message.
   Run at the end of every work session.
-allowed-tools: Read, Glob, Write, Bash
+allowed-tools: Read, Glob, Write, Bash, mcp__UnityMCP__run_tests, mcp__UnityMCP__read_console
 cost: haiku
 triggers:
   - "세션 종료"
@@ -38,6 +38,23 @@ git status --short 2>/dev/null || echo ""
 - 내린 설계 결정과 이유
 - 발견된 문제점과 임시 해결책
 - 다음 세션에서 할 작업
+
+### 2.5단계: MCP 테스트 실행 (Unity Editor 연결 시)
+
+UnityMCP 툴 사용 가능 여부에 따라 분기한다.
+
+**연결됨 → 테스트 실행 후 커밋:**
+
+1. `run_tests` 툴 호출 — EditMode 테스트 전체 실행
+2. `read_console` 툴 호출 — 에러 로그 확인
+3. 결과 출력:
+   - 전체 통과: `✅ 테스트 통과 (N/N)` → 4단계(커밋)로 진행
+   - 실패 있음: 실패 목록 출력 → "테스트 실패가 있습니다. 그래도 커밋할까요?" 질문
+   - 사용자 확인 후 진행
+
+**미연결 → 테스트 생략:**
+
+- `[MCP 미연결] 테스트 생략 — 커밋을 진행합니다.` 출력 후 3단계로 진행
 
 ### 3단계: claude-progress.txt 업데이트
 

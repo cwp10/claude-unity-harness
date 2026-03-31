@@ -25,6 +25,20 @@ CYAN='\033[0;36m'
 BLUE='\033[0;34m'
 NC='\033[0m'
 
+# ── MCP 연결 확인 함수 ────────────────────────────────────
+check_mcp_connected() {
+    if command -v curl > /dev/null 2>&1; then
+        curl -s --max-time 2 http://127.0.0.1:8080 > /dev/null 2>&1
+        return $?
+    elif command -v powershell > /dev/null 2>&1; then
+        powershell -NoProfile -Command \
+            "try{(New-Object System.Net.Sockets.TcpClient('127.0.0.1',8080)).Close();exit 0}catch{exit 1}" \
+            > /dev/null 2>&1
+        return $?
+    fi
+    return 1
+}
+
 # ── claude CLI 확인 ────────────────────────────────────────
 CLAUDE_CMD=""
 if command -v claude > /dev/null 2>&1; then
@@ -95,99 +109,127 @@ fi
 printf "${GREEN}  .meta 파일 확인 완료.${NC}\n\n"
 
 # ============================================================
-# STEP 1: Unity 컴파일 검증
+# STEP 1: Unity 컴파일 검증 (MCP 우선 → batchmode fallback)
 # ============================================================
 printf "${CYAN}━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━${NC}\n"
 printf "${CYAN}  [1/3] Unity 컴파일 검증${NC}\n"
 printf "${CYAN}━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━${NC}\n\n"
 
-UNITY_VERSION=""
-UNITY_EXE=""
+COMPILE_CHECKED=false
 VERSION_FILE="ProjectSettings/ProjectVersion.txt"
 
-if [ -f "$VERSION_FILE" ]; then
-    UNITY_VERSION=$(grep "m_EditorVersion:" "$VERSION_FILE" | awk '{print $2}' | tr -d '\r')
-    printf "  Unity 버전: %s\n" "$UNITY_VERSION"
+# ── 1A: MCP 컴파일 확인 (Unity Editor 실행 중일 때) ──────────
+if [ -n "$CLAUDE_CMD" ] && check_mcp_connected; then
+    printf "  ${CYAN}Unity MCP 연결됨 → read_console로 컴파일 확인 중...${NC}\n\n"
 
-    # 1순위: .claude/CLAUDE.md 에서 UNITY_PATH 읽기
-    if [ -f ".claude/CLAUDE.md" ]; then
-        CUSTOM_PATH=$(grep "UNITY_PATH:" ".claude/CLAUDE.md" | sed 's/.*UNITY_PATH: *//' | tr -d '\r')
-        if [ -n "$CUSTOM_PATH" ]; then
-            UNITY_EXE=$(echo "$CUSTOM_PATH" | sed 's|\\|/|g' | sed 's|^\([A-Za-z]\):|/\L\1|')
-            printf "  Unity.exe (CLAUDE.md): %s\n" "$UNITY_EXE"
-        fi
-    fi
+    CONSOLE_RESULT=$($CLAUDE_CMD -p --bare \
+"UnityMCP의 read_console 툴을 호출해서 현재 컴파일 에러를 확인해줘.
+컴파일 에러(Error 레벨)가 있으면 각각 'COMPILE_ERROR: [에러 내용]' 형식으로 출력.
+에러가 없으면 첫 줄에 정확히 'COMPILE_OK' 만 출력." \
+        2>/dev/null) || CONSOLE_RESULT=""
 
-    # 2순위: 기본 Hub 설치 경로 탐색
-    if [ -z "$UNITY_EXE" ] || [ ! -f "$UNITY_EXE" ]; then
-        UNITY_EXE=""
-        UNITY_BASE="/c/Program Files/Unity/Hub/Editor"
-        UNITY_EXE_C="${UNITY_BASE}/${UNITY_VERSION}/Editor/Unity.exe"
-        UNITY_EXE_D="/d/Program Files/Unity/Hub/Editor/${UNITY_VERSION}/Editor/Unity.exe"
-
-        if [ -f "$UNITY_EXE_C" ]; then
-            UNITY_EXE="$UNITY_EXE_C"
-        elif [ -f "$UNITY_EXE_D" ]; then
-            UNITY_EXE="$UNITY_EXE_D"
-        fi
+    if echo "$CONSOLE_RESULT" | grep -q "^COMPILE_OK"; then
+        printf "  ${GREEN}컴파일 성공 (MCP).${NC}\n\n"
+        COMPILE_CHECKED=true
+    elif echo "$CONSOLE_RESULT" | grep -q "^COMPILE_ERROR:"; then
+        printf "${RED}━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━${NC}\n"
+        printf "${RED}  커밋 차단: 컴파일 에러 발생 (MCP)${NC}\n"
+        printf "${RED}━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━${NC}\n\n"
+        echo "$CONSOLE_RESULT" | grep "^COMPILE_ERROR:" | while IFS= read -r err; do
+            printf "  %s\n" "$err"
+        done
+        printf "\n  Unity 에디터에서 에러를 수정한 후 다시 커밋하세요.\n"
+        printf "\n  긴급 시 강제 커밋:\n"
+        printf "    git commit --no-verify\n\n"
+        exit 1
+    else
+        printf "  ${YELLOW}MCP 결과 불명확 → batchmode로 재확인합니다.${NC}\n\n"
     fi
 fi
 
-if [ -z "$UNITY_VERSION" ]; then
-    printf "  ${YELLOW}ProjectSettings/ProjectVersion.txt 없음. 컴파일 검증 생략.${NC}\n\n"
-elif [ -z "$UNITY_EXE" ] || [ ! -f "$UNITY_EXE" ]; then
-    printf "  ${YELLOW}Unity.exe 경로를 찾을 수 없습니다. 컴파일 검증 생략.${NC}\n"
-    printf "  버전: %s\n" "$UNITY_VERSION"
-    printf "  커스텀 경로 설정: .claude/CLAUDE.md 에 아래 줄 추가\n"
-    printf "    UNITY_PATH: C:/Program Files/Unity/Hub/Editor/%s/Editor/Unity.exe\n\n" "$UNITY_VERSION"
-else
-    printf "  Unity.exe: %s\n" "$UNITY_EXE"
-    printf "  컴파일 검증 중... (최대 60초)\n\n"
+# ── 1B: batchmode fallback (MCP 미연결 또는 결과 불명확) ─────
+if [ "$COMPILE_CHECKED" = false ]; then
+    UNITY_VERSION=""
+    UNITY_EXE=""
 
-    COMPILE_LOG=".claude/compile_$(date +%Y%m%d_%H%M%S).log"
-    mkdir -p ".claude"
+    if [ -f "$VERSION_FILE" ]; then
+        UNITY_VERSION=$(grep "m_EditorVersion:" "$VERSION_FILE" | awk '{print $2}' | tr -d '\r')
+        printf "  Unity 버전: %s\n" "$UNITY_VERSION"
 
-    COMPILE_EXIT=0
-    timeout 60 "$UNITY_EXE" \
-        -batchmode \
-        -quit \
-        -projectPath "$(pwd)" \
-        -logFile "$COMPILE_LOG" \
-        -executeMethod "" \
-        > /dev/null 2>&1 || COMPILE_EXIT=$?
-
-    COMPILE_ERRORS=""
-    if [ -f "$COMPILE_LOG" ]; then
-        COMPILE_ERRORS=$(grep -iE "^.*error (CS|Unity)[0-9]+.*$" "$COMPILE_LOG" || true)
-    fi
-
-    if [ -n "$COMPILE_ERRORS" ] || [ "$COMPILE_EXIT" -eq 124 ]; then
-        printf "${RED}━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━${NC}\n"
-        if [ "$COMPILE_EXIT" -eq 124 ]; then
-            printf "${RED}  커밋 차단: 컴파일 타임아웃 (60초 초과)${NC}\n"
-        else
-            printf "${RED}  커밋 차단: 컴파일 에러 발생${NC}\n"
-        fi
-        printf "${RED}━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━${NC}\n\n"
-
-        if [ -n "$COMPILE_ERRORS" ]; then
-            printf "에러 목록:\n"
-            echo "$COMPILE_ERRORS" | while IFS= read -r err; do
-                printf "  %s\n" "$err"
-            done
-            printf "\n"
+        # 1순위: .claude/CLAUDE.md 에서 UNITY_PATH 읽기
+        if [ -f ".claude/CLAUDE.md" ]; then
+            CUSTOM_PATH=$(grep "UNITY_PATH:" ".claude/CLAUDE.md" | sed 's/.*UNITY_PATH: *//' | tr -d '\r')
+            if [ -n "$CUSTOM_PATH" ]; then
+                UNITY_EXE=$(echo "$CUSTOM_PATH" | sed 's|\\|/|g' | sed 's|^\([A-Za-z]\):|/\L\1|')
+                printf "  Unity.exe (CLAUDE.md): %s\n" "$UNITY_EXE"
+            fi
         fi
 
-        printf "  전체 로그: %s\n\n" "$COMPILE_LOG"
-        printf "  Unity 에디터에서 에러를 수정한 후 다시 커밋하세요.\n\n"
-        printf "  긴급 시 강제 커밋:\n"
-        printf "    git commit --no-verify\n\n"
-        exit 1
+        # 2순위: 기본 Hub 설치 경로 탐색
+        if [ -z "$UNITY_EXE" ] || [ ! -f "$UNITY_EXE" ]; then
+            UNITY_EXE=""
+            UNITY_EXE_C="/c/Program Files/Unity/Hub/Editor/${UNITY_VERSION}/Editor/Unity.exe"
+            UNITY_EXE_D="/d/Program Files/Unity/Hub/Editor/${UNITY_VERSION}/Editor/Unity.exe"
+            if [ -f "$UNITY_EXE_C" ]; then
+                UNITY_EXE="$UNITY_EXE_C"
+            elif [ -f "$UNITY_EXE_D" ]; then
+                UNITY_EXE="$UNITY_EXE_D"
+            fi
+        fi
     fi
 
-    printf "  ${GREEN}컴파일 성공.${NC}\n"
-    rm -f "$COMPILE_LOG"
-    printf "\n"
+    if [ -z "$UNITY_VERSION" ]; then
+        printf "  ${YELLOW}ProjectSettings/ProjectVersion.txt 없음. 컴파일 검증 생략.${NC}\n\n"
+    elif [ -z "$UNITY_EXE" ] || [ ! -f "$UNITY_EXE" ]; then
+        printf "  ${YELLOW}Unity.exe 경로를 찾을 수 없습니다. 컴파일 검증 생략.${NC}\n"
+        printf "  커스텀 경로 설정: .claude/CLAUDE.md 에 아래 줄 추가\n"
+        printf "    UNITY_PATH: C:/Program Files/Unity/Hub/Editor/%s/Editor/Unity.exe\n\n" "$UNITY_VERSION"
+    else
+        printf "  Unity.exe: %s\n" "$UNITY_EXE"
+        printf "  컴파일 검증 중... batchmode (최대 60초)\n\n"
+
+        COMPILE_LOG=".claude/compile_$(date +%Y%m%d_%H%M%S).log"
+        mkdir -p ".claude"
+
+        COMPILE_EXIT=0
+        timeout 60 "$UNITY_EXE" \
+            -batchmode \
+            -quit \
+            -projectPath "$(pwd)" \
+            -logFile "$COMPILE_LOG" \
+            -executeMethod "" \
+            > /dev/null 2>&1 || COMPILE_EXIT=$?
+
+        COMPILE_ERRORS=""
+        if [ -f "$COMPILE_LOG" ]; then
+            COMPILE_ERRORS=$(grep -iE "^.*error (CS|Unity)[0-9]+.*$" "$COMPILE_LOG" || true)
+        fi
+
+        if [ -n "$COMPILE_ERRORS" ] || [ "$COMPILE_EXIT" -eq 124 ]; then
+            printf "${RED}━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━${NC}\n"
+            if [ "$COMPILE_EXIT" -eq 124 ]; then
+                printf "${RED}  커밋 차단: 컴파일 타임아웃 (60초 초과)${NC}\n"
+            else
+                printf "${RED}  커밋 차단: 컴파일 에러 발생 (batchmode)${NC}\n"
+            fi
+            printf "${RED}━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━${NC}\n\n"
+            if [ -n "$COMPILE_ERRORS" ]; then
+                printf "에러 목록:\n"
+                echo "$COMPILE_ERRORS" | while IFS= read -r err; do
+                    printf "  %s\n" "$err"
+                done
+                printf "\n"
+            fi
+            printf "  전체 로그: %s\n\n" "$COMPILE_LOG"
+            printf "  긴급 시 강제 커밋:\n"
+            printf "    git commit --no-verify\n\n"
+            exit 1
+        fi
+
+        printf "  ${GREEN}컴파일 성공 (batchmode).${NC}\n"
+        rm -f "$COMPILE_LOG"
+        printf "\n"
+    fi
 fi
 
 # ============================================================
