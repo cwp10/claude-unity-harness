@@ -31,17 +31,17 @@ pwd
 
 둘 다 없으면 → "/setup 으로 프로젝트를 초기화하세요." 출력 후 종료.
 
-### 2.5단계: feature_list.json 읽기
+### 3단계: feature_list.json 읽기
 
 `feature_list.json` 파일 Read (있으면).
 passes: false 인 항목 수와 다음 작업할 기능 확인.
 
-### 3단계: git 이력 확인
+### 4단계: git 이력 확인
 ```bash
 git log --oneline -10 2>/dev/null || echo "git 이력 없음"
 ```
 
-### 4단계: 현재 상태 출력
+### 5단계: 현재 상태 출력
 
 ```
 ## 세션 복구 완료
@@ -62,6 +62,6 @@ git log --oneline -10 2>/dev/null || echo "git 이력 없음"
 (claude-progress.txt 의 알려진 이슈)
 ```
 
-### 5단계: 작업 재개 제안
+### 6단계: 작업 재개 제안
 
 "1번 작업부터 시작할까요?" 또는 "어떤 작업을 시작할까요?" 질문.

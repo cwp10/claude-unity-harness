@@ -72,6 +72,6 @@ cat ProjectSettings/ProjectVersion.txt 2>/dev/null | grep "m_EditorVersion" || e
 
 ### 문제 항목 수정 방법
 (❌/⚠️ 항목만 출력)
-- ❌ pre-commit hook: `/setup` 재실행 또는 `cp .claude/hooks/pre-commit .git/hooks/pre-commit && chmod +x .git/hooks/pre-commit`
+- ❌ pre-commit hook: `/setup --force` 재실행으로 자동 설치
 - ⚠️ project-memory.json: `/context-save` 실행으로 자동 생성
 ```

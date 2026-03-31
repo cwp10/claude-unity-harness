@@ -10,7 +10,7 @@ Unity 프로젝트를 위한 Claude Code 플러그인.
 
 ```
 /plugin marketplace add https://github.com/cwp10/claude-unity-harness
-/plugin install claude-unity-harness
+/plugin install claude-unity-harness@claude-unity
 ```
 
 설치 후 Unity 프로젝트 루트에서 최초 1회 실행:
@@ -36,6 +36,14 @@ Unity 프로젝트를 위한 Claude Code 플러그인.
 | `/analyze [대상]` | 코드·시스템 분석 |
 | `/git-summary` | 커밋 메시지 제안 |
 | `/doc readme\|handover\|delivery` | 문서 생성 |
+| `/deep-interview` | 요구사항 심층 인터뷰 |
+| `/setup-check` | 설치 상태 점검 |
+
+### 자동 로드 스킬
+
+| 스킬 | 로드 조건 |
+|------|----------|
+| `unity-patterns` | Unity C# 코드 작성·설계·리팩토링 시 자동 로드 |
 
 ---
 
@@ -67,9 +75,10 @@ git commit 시 자동 실행
 
 ```
 claude-unity-harness/
-├── skills/           슬래시 커맨드 11개 + 레퍼런스 스킬 5개
+├── skills/           슬래시 커맨드 13개 + 자동 로드 스킬 1개
 ├── agents/           unity-reviewer, architect-planner,
-│                     codebase-explorer, debugger, doc-writer
+│                     codebase-explorer, debugger, doc-writer,
+│                     critic, verifier
 ├── hooks/            pre-commit (Unity 자동 리뷰)
 ├── rules/            응답·git·코드리뷰 규칙
 ├── engines/          Unity 6 LTS 코딩 규칙
@@ -84,4 +93,3 @@ claude-unity-harness/
 - Claude Code CLI
 - Unity 6 LTS
 - Git for Windows (Git Bash)
-
