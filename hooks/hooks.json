@@ -2,32 +2,60 @@
   "hooks": {
     "SessionStart": [
       {
-        "matcher": "",
+        "matcher": "*",
         "hooks": [
           {
             "type": "command",
-            "command": "if [ -f .claude/project-memory.json ]; then echo '=== [claude-unity-harness] 프로젝트 메모리 ===' && cat .claude/project-memory.json; elif [ -f .claude/claude-progress.txt ]; then echo '=== [claude-unity-harness] 세션 컨텍스트 ===' && cat .claude/claude-progress.txt; elif [ -f .claude/feature_list.json ]; then echo '=== [claude-unity-harness] 기능 목록 ===' && cat .claude/feature_list.json; fi"
+            "command": "mkdir -p .claude && if [ -f .claude/project-memory.json ]; then echo '=== [claude-unity-harness] 프로젝트 메모리 ===' && cat .claude/project-memory.json; elif [ -f .claude/claude-progress.txt ]; then echo '=== [claude-unity-harness] 세션 컨텍스트 ===' && cat .claude/claude-progress.txt; elif [ -f .claude/feature_list.json ]; then echo '=== [claude-unity-harness] 기능 목록 ===' && cat .claude/feature_list.json; fi; touch .claude/.context_loaded",
+            "timeout": 5
           }
         ]
       }
     ],
     "UserPromptSubmit": [
       {
-        "matcher": "",
+        "matcher": "*",
         "hooks": [
           {
             "type": "command",
-            "command": "mkdir -p .claude && if [ ! -f .claude/.context_loaded ]; then if [ -f .claude/project-memory.json ]; then echo '=== [claude-unity-harness] 프로젝트 메모리 ===' && cat .claude/project-memory.json; elif [ -f .claude/claude-progress.txt ]; then echo '=== [claude-unity-harness] 세션 컨텍스트 ===' && cat .claude/claude-progress.txt; elif [ -f .claude/feature_list.json ]; then echo '=== [claude-unity-harness] 기능 목록 ===' && cat .claude/feature_list.json; fi; touch .claude/.context_loaded; fi"
+            "command": "mkdir -p .claude && if [ ! -f .claude/.context_loaded ]; then if [ -f .claude/project-memory.json ]; then echo '=== [claude-unity-harness] 프로젝트 메모리 ===' && cat .claude/project-memory.json; elif [ -f .claude/claude-progress.txt ]; then echo '=== [claude-unity-harness] 세션 컨텍스트 ===' && cat .claude/claude-progress.txt; elif [ -f .claude/feature_list.json ]; then echo '=== [claude-unity-harness] 기능 목록 ===' && cat .claude/feature_list.json; fi; touch .claude/.context_loaded; fi",
+            "timeout": 5
+          }
+        ]
+      }
+    ],
+    "Stop": [
+      {
+        "matcher": "*",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "python3 -c \"\nimport json, subprocess, datetime, os\nmem = '.claude/project-memory.json'\ntry:\n    changed = subprocess.check_output(['git', 'diff', '--name-only', 'HEAD'], text=True).strip().split('\\n')\n    changed = [f for f in changed if f]\nexcept:\n    changed = []\nnow = datetime.datetime.utcnow().strftime('%Y-%m-%dT%H:%M:%SZ')\nif os.path.exists(mem):\n    with open(mem) as f:\n        data = json.load(f)\nelse:\n    data = {'currentFeature':'','currentStep':'','changedFiles':[],'decisions':[],'criticalIssues':[],'nextAction':'','savedAt':''}\ndata['changedFiles'] = changed\ndata['savedAt'] = now\nwith open(mem, 'w', encoding='utf-8') as f:\n    json.dump(data, f, ensure_ascii=False, indent=2)\n\"",
+            "timeout": 5
+          }
+        ]
+      }
+    ],
+    "PreCompact": [
+      {
+        "matcher": "*",
+        "hooks": [
+          {
+            "type": "agent",
+            "prompt": "컨텍스트 압축 전에 현재 작업 상태를 .claude/project-memory.json에 저장하세요. 대화 내용을 바탕으로 { \"currentFeature\": \"작업 중인 기능명\", \"currentStep\": \"현재 진행 단계\", \"changedFiles\": [\"변경된 파일 경로 목록\"], \"decisions\": [\"설계 결정과 이유\"], \"criticalIssues\": [\"발견된 Critical 이슈\"], \"nextAction\": \"다음에 할 작업\", \"savedAt\": \"저장 시각\" } 형식으로 작성하세요. 기존 파일이 있으면 최신 내용으로 갱신하세요.",
+            "timeout": 30
           }
         ]
       }
     ],
     "SessionEnd": [
       {
+        "matcher": "*",
         "hooks": [
           {
             "type": "command",
-            "command": "rm -f .claude/.context_loaded && echo '[claude-unity-harness] 세션 종료. 다음 세션에서 컨텍스트가 자동 로드됩니다.'"
+            "command": "rm -f .claude/.context_loaded",
+            "timeout": 5
           }
         ]
       }
@@ -38,7 +66,8 @@
         "hooks": [
           {
             "type": "command",
-            "command": "FILE=$(echo \"$CLAUDE_TOOL_INPUT\" | grep -o '\"file_path\"[[:space:]]*:[[:space:]]*\"[^\"]*\"' | grep -o '\"[^\"]*\"$' | tr -d '\"' 2>/dev/null || true); if echo \"$FILE\" | grep -q '\\.cs$' && [ -n \"$FILE\" ]; then if [ ! -f \"${FILE}.meta\" ]; then echo \"[claude-unity-harness] ⚠️ .meta 파일 없음: ${FILE}.meta → Unity Editor를 열어 자동 생성하거나 pre-commit hook이 처리합니다.\"; fi; MCP_OK=false; if command -v curl > /dev/null 2>&1 && curl -s --max-time 1 http://127.0.0.1:8080 > /dev/null 2>&1; then MCP_OK=true; elif command -v powershell > /dev/null 2>&1 && powershell -NoProfile -Command \"try{(New-Object System.Net.Sockets.TcpClient('127.0.0.1',8080)).Close();exit 0}catch{exit 1}\" 2>/dev/null; then MCP_OK=true; fi; if [ \"$MCP_OK\" = true ]; then echo \"[UNITY_MCP] .cs 파일 저장됨 — read_console 툴로 컴파일 에러를 확인하세요.\"; fi; fi"
+            "command": "FILE=$(echo \"$CLAUDE_TOOL_INPUT\" | grep -o '\"file_path\"[[:space:]]*:[[:space:]]*\"[^\"]*\"' | grep -o '\"[^\"]*\"$' | tr -d '\"' 2>/dev/null || true); if echo \"$FILE\" | grep -q '\\.cs$' && [ -n \"$FILE\" ]; then if [ ! -f \"${FILE}.meta\" ]; then echo \"[claude-unity-harness] ⚠️ .meta 파일 없음: ${FILE}.meta → Unity Editor를 열어 자동 생성하거나 pre-commit hook이 처리합니다.\"; fi; MCP_OK=false; if command -v curl > /dev/null 2>&1 && curl -s --max-time 1 http://127.0.0.1:8080 > /dev/null 2>&1; then MCP_OK=true; elif command -v powershell > /dev/null 2>&1 && powershell -NoProfile -Command \"try{(New-Object System.Net.Sockets.TcpClient('127.0.0.1',8080)).Close();exit 0}catch{exit 1}\" 2>/dev/null; then MCP_OK=true; fi; if [ \"$MCP_OK\" = true ]; then echo \"[UNITY_MCP] .cs 파일 저장됨 — read_console 툴로 컴파일 에러를 확인하세요.\"; fi; fi",
+            "timeout": 5
           }
         ]
       }
@@ -49,7 +78,8 @@
         "hooks": [
           {
             "type": "command",
-            "command": "FILE=$(echo \"$CLAUDE_TOOL_INPUT\" | grep -o '\"file_path\"[[:space:]]*:[[:space:]]*\"[^\"]*\"' | grep -o '\"[^\"]*\"$' | tr -d '\"' 2>/dev/null || true); if echo \"$FILE\" | grep -q '\\.cs$'; then printf '=== [claude-unity-harness] Unity C# 규칙 ===\\n- private 필드: m_ 접두사 (m_health)\\n- 상수: k_ 접두사 (k_MaxCount)\\n- 정적: s_ 접두사 (s_instance)\\n- 중괄호: Allman 스타일 (여는 중괄호 새 줄)\\n- Update()에서 GetComponent 호출 금지 → Awake에서 캐싱\\n- public 필드 직접 노출 금지 → [SerializeField] private 사용\\n- OnDisable/OnDestroy에서 이벤트 구독 해제 필수\\n'; fi"
+            "command": "FILE=$(echo \"$CLAUDE_TOOL_INPUT\" | grep -o '\"file_path\"[[:space:]]*:[[:space:]]*\"[^\"]*\"' | grep -o '\"[^\"]*\"$' | tr -d '\"' 2>/dev/null || true); if echo \"$FILE\" | grep -q '\\.cs$'; then printf '=== [claude-unity-harness] Unity C# 규칙 ===\\n- private 필드: m_ 접두사 (m_health)\\n- 상수: k_ 접두사 (k_MaxCount)\\n- 정적: s_ 접두사 (s_instance)\\n- 중괄호: Allman 스타일 (여는 중괄호 새 줄)\\n- Update()에서 GetComponent 호출 금지 → Awake에서 캐싱\\n- public 필드 직접 노출 금지 → [SerializeField] private 사용\\n- OnDisable/OnDestroy에서 이벤트 구독 해제 필수\\n'; fi",
+            "timeout": 3
           }
         ]
       }

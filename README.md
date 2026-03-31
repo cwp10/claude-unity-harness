@@ -115,8 +115,10 @@ claude-unity-harness/
 
 | 이벤트 | 동작 |
 |--------|------|
-| **SessionStart** | `project-memory.json` → `.claude/claude-progress.txt` → `.claude/feature_list.json` 순으로 컨텍스트를 자동 주입 |
+| **SessionStart** | `project-memory.json` → `.claude/claude-progress.txt` → `.claude/feature_list.json` 순으로 컨텍스트를 자동 주입 + `.context_loaded` 생성 |
 | **UserPromptSubmit** | 첫 번째 메시지 전에 컨텍스트가 없으면 동일하게 자동 주입 (SessionStart 누락 보정) |
+| **Stop** | 매 응답 완료 후 git 변경 파일 목록을 `project-memory.json`에 증분 저장 (토큰 비용 없음) |
+| **PreCompact** | 컨텍스트 압축 직전 LLM이 대화 내용을 요약해 `project-memory.json` 전체 갱신 |
 | **SessionEnd** | `.context_loaded` 플래그 삭제 — 다음 세션에서 컨텍스트가 다시 로드될 수 있도록 초기화 |
 | **PreToolUse (Write/Edit)** | `.cs` 파일 수정 직전마다 Unity C# 핵심 규칙(m\_ 접두사, Allman 중괄호 등) 자동 주입 |
 | **PostToolUse (Write/Edit)** | `.cs` 파일 저장 직후 `.meta` 누락 경고 자동 출력 |
@@ -316,9 +318,13 @@ git commit --no-verify -m "[hotfix] 긴급 수정"
   /audit
   → 전체 코드베이스 감사 + 빌드 체크
 
+세션 중 자동 저장 (hooks)
+  → Stop hook: 매 응답 완료 후 git 변경 파일 목록 자동 증분 저장 (토큰 0)
+  → PreCompact hook: 컨텍스트 압축 직전 LLM 요약 저장
+
 세션 종료
-  /context-save
-  → .claude/claude-progress.txt + project-memory.json 업데이트
+  /context-save (선택)
+  → .claude/claude-progress.txt + project-memory.json 수동 요약 저장
   → git commit (세션 내용 자동 커밋)
   대화 닫기
   → SessionEnd hook: 다음 세션 컨텍스트 로드 플래그 초기화
