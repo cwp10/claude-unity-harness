@@ -1,4 +1,4 @@
-# claude-unity 플러그인
+# claude-unity-harness 플러그인
 
 Unity 프로젝트를 위한 Claude Code CLI 전용 플러그인.
 

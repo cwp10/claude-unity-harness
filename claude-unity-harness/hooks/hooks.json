@@ -6,7 +6,7 @@
         "hooks": [
           {
             "type": "command",
-            "command": "if [ -f .claude/project-memory.json ]; then echo '=== [claude-unity] 프로젝트 메모리 ===' && cat .claude/project-memory.json; elif [ -f claude-progress.txt ]; then echo '=== [claude-unity] 세션 컨텍스트 ===' && cat claude-progress.txt; elif [ -f feature_list.json ]; then echo '=== [claude-unity] 기능 목록 ===' && cat feature_list.json; fi"
+            "command": "if [ -f .claude/project-memory.json ]; then echo '=== [claude-unity-harness] 프로젝트 메모리 ===' && cat .claude/project-memory.json; elif [ -f claude-progress.txt ]; then echo '=== [claude-unity-harness] 세션 컨텍스트 ===' && cat claude-progress.txt; elif [ -f feature_list.json ]; then echo '=== [claude-unity-harness] 기능 목록 ===' && cat feature_list.json; fi"
           }
         ]
       }
@@ -17,7 +17,7 @@
         "hooks": [
           {
             "type": "command",
-            "command": "mkdir -p .claude && if [ ! -f .claude/.context_loaded ]; then if [ -f .claude/project-memory.json ]; then echo '=== [claude-unity] 프로젝트 메모리 ===' && cat .claude/project-memory.json; elif [ -f claude-progress.txt ]; then echo '=== [claude-unity] 세션 컨텍스트 ===' && cat claude-progress.txt; elif [ -f feature_list.json ]; then echo '=== [claude-unity] 기능 목록 ===' && cat feature_list.json; fi; touch .claude/.context_loaded; fi"
+            "command": "mkdir -p .claude && if [ ! -f .claude/.context_loaded ]; then if [ -f .claude/project-memory.json ]; then echo '=== [claude-unity-harness] 프로젝트 메모리 ===' && cat .claude/project-memory.json; elif [ -f claude-progress.txt ]; then echo '=== [claude-unity-harness] 세션 컨텍스트 ===' && cat claude-progress.txt; elif [ -f feature_list.json ]; then echo '=== [claude-unity-harness] 기능 목록 ===' && cat feature_list.json; fi; touch .claude/.context_loaded; fi"
           }
         ]
       }
@@ -27,7 +27,7 @@
         "hooks": [
           {
             "type": "command",
-            "command": "rm -f .claude/.context_loaded && echo '[claude-unity] 세션 종료. 다음 세션에서 컨텍스트가 자동 로드됩니다.'"
+            "command": "rm -f .claude/.context_loaded && echo '[claude-unity-harness] 세션 종료. 다음 세션에서 컨텍스트가 자동 로드됩니다.'"
           }
         ]
       }
@@ -38,7 +38,7 @@
         "hooks": [
           {
             "type": "command",
-            "command": "FILE=$(echo \"$CLAUDE_TOOL_INPUT\" | grep -o '\"file_path\"[[:space:]]*:[[:space:]]*\"[^\"]*\"' | grep -o '\"[^\"]*\"$' | tr -d '\"' 2>/dev/null || true); if echo \"$FILE\" | grep -q '\\.cs$' && [ -n \"$FILE\" ] && [ ! -f \"${FILE}.meta\" ]; then echo \"[claude-unity] ⚠️ .meta 파일 없음: ${FILE}.meta → Unity Editor를 열어 자동 생성하거나 pre-commit hook이 처리합니다.\"; fi"
+            "command": "FILE=$(echo \"$CLAUDE_TOOL_INPUT\" | grep -o '\"file_path\"[[:space:]]*:[[:space:]]*\"[^\"]*\"' | grep -o '\"[^\"]*\"$' | tr -d '\"' 2>/dev/null || true); if echo \"$FILE\" | grep -q '\\.cs$' && [ -n \"$FILE\" ] && [ ! -f \"${FILE}.meta\" ]; then echo \"[claude-unity-harness] ⚠️ .meta 파일 없음: ${FILE}.meta → Unity Editor를 열어 자동 생성하거나 pre-commit hook이 처리합니다.\"; fi"
           }
         ]
       }
@@ -49,7 +49,7 @@
         "hooks": [
           {
             "type": "command",
-            "command": "FILE=$(echo \"$CLAUDE_TOOL_INPUT\" | grep -o '\"file_path\"[[:space:]]*:[[:space:]]*\"[^\"]*\"' | grep -o '\"[^\"]*\"$' | tr -d '\"' 2>/dev/null || true); if echo \"$FILE\" | grep -q '\\.cs$'; then printf '=== [claude-unity] Unity C# 규칙 ===\\n- private 필드: m_ 접두사 (m_health)\\n- 상수: k_ 접두사 (k_MaxCount)\\n- 정적: s_ 접두사 (s_instance)\\n- 중괄호: Allman 스타일 (여는 중괄호 새 줄)\\n- Update()에서 GetComponent 호출 금지 → Awake에서 캐싱\\n- public 필드 직접 노출 금지 → [SerializeField] private 사용\\n- OnDisable/OnDestroy에서 이벤트 구독 해제 필수\\n'; fi"
+            "command": "FILE=$(echo \"$CLAUDE_TOOL_INPUT\" | grep -o '\"file_path\"[[:space:]]*:[[:space:]]*\"[^\"]*\"' | grep -o '\"[^\"]*\"$' | tr -d '\"' 2>/dev/null || true); if echo \"$FILE\" | grep -q '\\.cs$'; then printf '=== [claude-unity-harness] Unity C# 규칙 ===\\n- private 필드: m_ 접두사 (m_health)\\n- 상수: k_ 접두사 (k_MaxCount)\\n- 정적: s_ 접두사 (s_instance)\\n- 중괄호: Allman 스타일 (여는 중괄호 새 줄)\\n- Update()에서 GetComponent 호출 금지 → Awake에서 캐싱\\n- public 필드 직접 노출 금지 → [SerializeField] private 사용\\n- OnDisable/OnDestroy에서 이벤트 구독 해제 필수\\n'; fi"
           }
         ]
       }

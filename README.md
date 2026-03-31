@@ -1,4 +1,4 @@
-# claude-unity
+# claude-unity-harness
 
 Unity 프로젝트를 위한 Claude Code 플러그인.
 
