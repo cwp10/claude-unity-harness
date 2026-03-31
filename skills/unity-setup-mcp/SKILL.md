@@ -1,3 +1,13 @@
+---
+name: unity-setup-mcp
+description: >
+  Unity MCP 서버(CoplayDev/unity-mcp)를 현재 프로젝트에 연동합니다.
+  패키지 설치 안내, 서버 시작, MCP 등록까지 단계별로 안내합니다.
+  Usage: /unity-setup-mcp
+allowed-tools: Bash
+keywords: [unity, mcp, setup, connect, server]
+---
+
 # /unity-setup-mcp
 
 Unity MCP 서버(CoplayDev/unity-mcp)를 현재 프로젝트에 연동한다.
