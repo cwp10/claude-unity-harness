@@ -39,6 +39,9 @@ Unity 프로젝트를 위한 Claude Code 플러그인.
 | `/deep-interview` | 요구사항 심층 인터뷰 |
 | `/setup-check` | 설치 상태 점검 |
 | `/unity-setup-mcp` | Unity MCP 서버(CoplayDev/unity-mcp) 연동 설정 |
+| `/unity-console` | Unity 콘솔 에러·경고 분석 + 수정 제안 (UnityMCP 필요) |
+| `/unity-test [EditMode\|PlayMode]` | 테스트 실행 + 실패 원인 분석 (UnityMCP 필요) |
+| `/unity-scene-audit` | 현재 씬 품질 감사 — Missing·네이밍·성능 점검 (UnityMCP 필요) |
 
 ### 자동 로드 스킬
 
@@ -53,7 +56,7 @@ Unity 프로젝트를 위한 Claude Code 플러그인.
 ```
 claude-unity-harness/
 │
-├── skills/                  슬래시 커맨드 구현체 (14개 + 자동 로드 스킬 1개)
+├── skills/                  슬래시 커맨드 구현체 (17개 + 자동 로드 스킬 1개)
 │   ├── plan/                설계 플랜 생성
 │   ├── review/              코드 리뷰
 │   ├── refactor/            리팩토링 플랜 + 실행
@@ -68,6 +71,9 @@ claude-unity-harness/
 │   ├── setup/               프로젝트 초기화
 │   ├── setup-check/         설치 상태 점검
 │   ├── unity-setup-mcp/     Unity MCP 서버 연동 설정
+│   ├── unity-console/       Unity 콘솔 에러·경고 분석 (UnityMCP)
+│   ├── unity-test/          테스트 실행 + 실패 분석 (UnityMCP)
+│   ├── unity-scene-audit/   씬 품질 감사 (UnityMCP)
 │   └── unity-patterns/      Unity C# 패턴 레퍼런스 (자동 로드)
 │
 ├── agents/                  스킬이 내부적으로 위임하는 전문 에이전트
