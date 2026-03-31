@@ -1,6 +1,6 @@
 {
   "name": "claude-unity-harness",
-  "version": "0.800.0",
+  "version": "1.0.0",
   "description": "Unity 프로젝트를 위한 Claude Code 전용 플러그인. 세션 관리, 코드 리뷰, 설계 플랜, 문서화, pre-commit 자동 리뷰를 포함합니다.",
   "author": {
     "name": "Wonpyoung Choi",

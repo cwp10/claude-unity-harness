@@ -8,13 +8,14 @@ Unity 프로젝트를 위한 Claude Code 플러그인.
 
 ## 설치
 
-```bash
-claude plugin install claude-unity-harness.plugin
+```
+/plugin marketplace add https://github.com/cwp10/claude-unity-harness
+/plugin install claude-unity-harness
 ```
 
 설치 후 Unity 프로젝트 루트에서 최초 1회 실행:
 
-```bash
+```
 /setup
 ```
 
@@ -84,12 +85,3 @@ claude-unity-harness/
 - Unity 6 LTS
 - Git for Windows (Git Bash)
 
----
-
-## 플러그인 빌드
-
-```powershell
-cd claude-unity-harness
-Compress-Archive -Path * -DestinationPath ..\claude-unity-harness-temp.zip
-Rename-Item ..\claude-unity-harness-temp.zip ..\claude-unity-harness.plugin
-```

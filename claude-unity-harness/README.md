@@ -6,6 +6,31 @@ Unity 프로젝트를 위한 Claude Code CLI 전용 플러그인.
 
 ---
 
+## 설치 방법
+
+### Claude Code CLI
+
+```
+/plugin marketplace add https://github.com/cwp10/claude-unity-harness
+/plugin install claude-unity-harness
+```
+
+초기화 및 상태 확인:
+
+```
+/setup
+/setup-check
+```
+
+### pre-commit hook
+
+`/setup` 실행 시 자동 설치됩니다. 재설치가 필요하면:
+```bash
+/setup --force
+```
+
+---
+
 ## 포함 컴포넌트
 
 ### Skills (슬래시 커맨드)
@@ -54,30 +79,6 @@ Unity 프로젝트를 위한 Claude Code CLI 전용 플러그인.
 | `PreToolUse (Write\|Edit *.cs)` | Unity C# 네이밍·코딩 규칙 컨텍스트 주입 |
 | `PostToolUse (Write *.cs)` | 신규 .cs 파일 생성 시 .meta 누락 경고 |
 | `pre-commit (git hook)` | .meta 확인 → 컴파일 → 코드 리뷰 → 문서 자동화 |
-
----
-
-## 설치 방법
-
-### Claude Code CLI
-
-```bash
-# 플러그인 설치
-claude plugin install claude-unity-harness.plugin
-
-# Unity 프로젝트 루트에서 초기화 (최초 1회)
-/setup
-
-# 설치 상태 확인
-/setup-check
-```
-
-### pre-commit hook
-
-`/setup` 실행 시 자동 설치됩니다. 재설치가 필요하면:
-```bash
-/setup --force
-```
 
 ---
 
