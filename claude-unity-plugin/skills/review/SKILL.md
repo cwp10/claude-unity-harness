@@ -8,6 +8,15 @@ description: >
   Example: /review Assets/_Project/Scripts/Game/PlayerController.cs
   If no file specified, auto-detects recently changed .cs files.
 allowed-tools: Read, Grep, Glob, Bash, Write
+cost: opus
+triggers:
+  - "리뷰해줘"
+  - "코드 검토"
+  - "확인해줘"
+  - "문제 있어?"
+  - "코드 봐줘"
+  - "개선점 알려줘"
+keywords: [review, code-quality, unity, csharp, critique]
 ---
 
 대상 파일: $ARGUMENTS

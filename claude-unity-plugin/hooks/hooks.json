@@ -1,0 +1,27 @@
+{
+  "hooks": [
+    {
+      "event": "SessionStart",
+      "type": "prompt",
+      "prompt": "세션이 시작되었습니다. 프로젝트 루트에 claude-progress.txt 또는 feature_list.json 이 있으면 자동으로 읽어 현재 진행 상황을 파악하세요. 파일이 없으면 조용히 넘어갑니다."
+    },
+    {
+      "event": "PreToolUse",
+      "tool": "Write",
+      "matcher": {
+        "file_path": ".*\\.cs$"
+      },
+      "type": "prompt",
+      "prompt": "Unity C# 파일을 작성하기 전에 다음 규칙을 준수하고 있는지 확인하세요:\n- private 필드: m_ 접두사 (m_currentHealth)\n- 상수: k_ 접두사 (k_MaxItems)\n- 정적 변수: s_ 접두사 (s_instance)\n- 중괄호: Allman 스타일 (여는 중괄호 새 줄)\n- Update()에서 GetComponent() 호출 금지 → Awake에서 캐싱\n- public 필드 직접 노출 금지 → [SerializeField] private 사용\n- 이벤트 구독 시 OnDisable/OnDestroy에서 해제 코드 필수"
+    },
+    {
+      "event": "PreToolUse",
+      "tool": "Edit",
+      "matcher": {
+        "file_path": ".*\\.cs$"
+      },
+      "type": "prompt",
+      "prompt": "Unity C# 파일을 수정하기 전에 다음 규칙을 준수하고 있는지 확인하세요:\n- private 필드: m_ 접두사 (m_currentHealth)\n- 상수: k_ 접두사 (k_MaxItems)\n- 정적 변수: s_ 접두사 (s_instance)\n- 중괄호: Allman 스타일 (여는 중괄호 새 줄)\n- Update()에서 GetComponent() 호출 금지 → Awake에서 캐싱\n- public 필드 직접 노출 금지 → [SerializeField] private 사용\n- 이벤트 구독 시 OnDisable/OnDestroy에서 해제 코드 필수"
+    }
+  ]
+}

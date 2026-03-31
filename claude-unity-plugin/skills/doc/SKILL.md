@@ -9,6 +9,15 @@ description: >
   Example: /doc handover CombatSystem
   Example: /doc delivery v1.0.0 2025-06-01
 allowed-tools: Read, Glob, Grep, Bash, Write
+cost: sonnet
+triggers:
+  - "문서 만들어줘"
+  - "README"
+  - "인수인계"
+  - "납품 문서"
+  - "외주 넘길 문서"
+  - "가이드 작성"
+keywords: [doc, readme, handover, delivery, documentation, guide]
 ---
 
 요청: $ARGUMENTS

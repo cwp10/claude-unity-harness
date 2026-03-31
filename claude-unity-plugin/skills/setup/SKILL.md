@@ -5,6 +5,12 @@ description: >
   하네스 파일(claude-progress.txt, feature_list.json)을 생성하고 pre-commit hook을 설치한다.
   프로젝트 루트에서 최초 1회 실행. 재실행은 /setup --force.
 allowed-tools: Read, Glob, Bash, Write
+cost: sonnet
+triggers:
+  - "처음 설정"
+  - "프로젝트 초기화"
+  - "setup 해줘"
+keywords: [setup, init, project, unity, harness]
 ---
 
 요청: $ARGUMENTS

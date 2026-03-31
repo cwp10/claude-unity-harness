@@ -10,6 +10,8 @@ tools: Read, Glob, Grep, Write
 model: sonnet
 permissionMode: acceptEdits
 skills: [doc-templates]
+useWhen: XML 주석, README, 인수인계 문서, 납품 문서, 아키텍처 문서 생성이 필요할 때. /doc 스킬이 위임할 때.
+avoidWhen: 코드 로직 수정, 버그 수정, 리팩토링, 기능 구현. 문서화 외 작업 요청.
 ---
 
 # 문서 작성 에이전트

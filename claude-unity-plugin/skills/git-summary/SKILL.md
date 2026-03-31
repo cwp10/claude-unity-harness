@@ -2,6 +2,14 @@
 name: git-summary
 description: 오늘 작업한 Git 변경사항을 요약하고 커밋 메시지를 제안한다
 allowed-tools: Bash, Read
+cost: haiku
+triggers:
+  - "커밋 메시지"
+  - "오늘 작업 정리"
+  - "git 요약"
+  - "변경사항 정리"
+  - "커밋 단위로 나눠줘"
+keywords: [git, commit, summary, changelog, diff]
 ---
 
 다음 순서로 실행한다:

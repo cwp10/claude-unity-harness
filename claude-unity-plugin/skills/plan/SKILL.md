@@ -8,6 +8,14 @@ description: >
   Example: /plan 인벤토리 시스템
   Example: /plan 보스 전투 패턴
 allowed-tools: Read, Glob, Grep, Write
+cost: opus
+triggers:
+  - "설계해줘"
+  - "아키텍처"
+  - "어떻게 만들까"
+  - "플랜 짜줘"
+  - "구조 잡아줘"
+keywords: [plan, architecture, design, feature, system]
 ---
 
 요청: $ARGUMENTS

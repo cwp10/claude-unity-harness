@@ -7,6 +7,13 @@ description: >
   verify current state, then present what to work on next.
   Run at the start of every work session to get up to speed.
 allowed-tools: Read, Glob, Bash
+cost: haiku
+triggers:
+  - "세션 시작"
+  - "이어서 작업"
+  - "진행 상황 확인"
+  - "어디까지 했지"
+keywords: [session, context, progress, resume]
 ---
 
 ## 세션 시작 루틴 (공식 하네스 패턴)

@@ -11,6 +11,8 @@ model: haiku
 maxTurns: 10
 permissionMode: plan
 memory: project
+useWhen: 코드베이스 구조 파악, 관련 파일 탐색, 의존성 맵핑이 필요할 때. /plan·/review·/refactor·/analyze 스킬이 사전 탐색용으로 위임할 때.
+avoidWhen: 코드 수정, 버그 수정, 설계 결정, 구현 작업. 탐색·요약만 담당하며 판단은 하지 않음.
 ---
 
 # 코드베이스 탐색 에이전트

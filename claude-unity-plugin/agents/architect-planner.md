@@ -12,6 +12,8 @@ description: >
 tools: Read, Glob, Grep, Write
 model: sonnet
 permissionMode: default
+useWhen: 사용자가 새 시스템 설계, 아키텍처 플랜, 리팩토링 플랜을 요청할 때. /plan 또는 /refactor 스킬이 위임할 때.
+avoidWhen: 버그 수정, 단순 코드 편집, 코드 리뷰, 파일 탐색만 필요한 작업. 승인 전 절대 코드 작성 금지.
 ---
 
 # 아키텍처 설계 에이전트

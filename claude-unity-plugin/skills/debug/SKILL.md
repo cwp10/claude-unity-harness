@@ -8,6 +8,15 @@ description: >
   Provides root cause analysis and corrected code.
   Do NOT use for new feature development or code review — use /plan or /review.
 allowed-tools: Read, Glob, Grep, Bash, Write
+cost: sonnet
+triggers:
+  - "에러"
+  - "버그"
+  - "오류"
+  - "NullReferenceException"
+  - "왜 안 돼"
+  - "크래시"
+keywords: [debug, error, bug, stacktrace, exception, unity]
 ---
 
 대상: $ARGUMENTS

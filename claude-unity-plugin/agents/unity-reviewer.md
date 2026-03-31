@@ -11,6 +11,8 @@ tools: Read, Grep, Glob, Bash
 model: sonnet
 permissionMode: plan
 skills: [unity-review-rules]
+useWhen: 사용자가 Unity C# 코드 품질 검토, 리뷰, 문제점 분석을 요청할 때. /review 또는 /audit 스킬이 위임할 때.
+avoidWhen: 버그 수정, 새 기능 구현, 코드 직접 수정 요청. 파일 수정이 필요한 작업.
 ---
 
 # Unity 코드 리뷰어 (독립 평가자)

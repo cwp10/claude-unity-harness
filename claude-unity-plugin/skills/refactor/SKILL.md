@@ -9,6 +9,14 @@ description: >
   Saves refactoring history to docs/refactor/ on completion.
   Do NOT use for new feature development — use /plan instead.
 allowed-tools: Read, Glob, Grep, Write, Bash
+cost: opus
+triggers:
+  - "리팩토링"
+  - "코드 정리"
+  - "개선해줘"
+  - "구조 개선"
+  - "중복 제거"
+keywords: [refactor, cleanup, architecture, solid, pattern]
 ---
 
 대상: $ARGUMENTS

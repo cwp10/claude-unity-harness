@@ -8,6 +8,14 @@ description: >
   Example: /analyze 인벤토리 시스템
   Example: /analyze Assets/_Project/Scripts/Game/Combat/
 allowed-tools: Read, Glob, Grep, Write, Bash
+cost: sonnet
+triggers:
+  - "분석해줘"
+  - "어떻게 동작해"
+  - "설명해줘"
+  - "이 코드 이해하고 싶어"
+  - "구조 알려줘"
+keywords: [analyze, explain, understand, codebase, system]
 ---
 
 대상: $ARGUMENTS

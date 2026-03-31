@@ -7,6 +7,13 @@ description: >
   Commits all changes with a descriptive message.
   Run at the end of every work session.
 allowed-tools: Read, Glob, Write, Bash
+cost: haiku
+triggers:
+  - "세션 종료"
+  - "작업 저장"
+  - "오늘 마무리"
+  - "커밋하고 끝내자"
+keywords: [save, commit, session, progress, end]
 ---
 
 ## 실행 순서

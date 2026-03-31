@@ -8,6 +8,8 @@ description: >
 tools: Read, Glob, Grep, Bash, Write, Edit
 model: sonnet
 permissionMode: acceptEdits
+useWhen: Unity C# 오류 메시지, 스택 트레이스, NullReferenceException 등 버그 진단·수정이 필요할 때. /debug 스킬이 위임할 때.
+avoidWhen: 새 기능 개발, 코드 리뷰, 리팩토링, 아키텍처 설계. 오류 없는 코드 개선 요청.
 ---
 
 # 디버거 에이전트

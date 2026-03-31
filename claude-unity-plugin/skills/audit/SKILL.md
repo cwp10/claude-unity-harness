@@ -6,6 +6,14 @@ description: >
   Unity: code quality audit (unity-reviewer) + .meta files, compile errors, folder structure.
   Both tasks run concurrently.
 allowed-tools: Read, Glob, Grep, Bash, Write
+cost: opus
+triggers:
+  - "전체 감사"
+  - "빌드 체크"
+  - "전체 리뷰"
+  - "프로젝트 점검"
+  - "배포 전 확인"
+keywords: [audit, build, quality, meta, check, ci]
 ---
 
 ## 실행 순서
