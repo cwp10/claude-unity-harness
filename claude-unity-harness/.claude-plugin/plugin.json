@@ -8,6 +8,5 @@
   },
   "keywords": ["unity", "csharp", "game-dev", "code-review", "harness"],
   "homepage": "https://github.com/cwp10/claude-unity-harness",
-  "repository": "https://github.com/cwp10/claude-unity-harness",
-  "hooks": "./hooks/hooks.json"
+  "repository": "https://github.com/cwp10/claude-unity-harness"
 }
