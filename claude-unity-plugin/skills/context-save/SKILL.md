@@ -1,9 +1,9 @@
 ---
 name: context-save
 description: >
-  Saves the current session's progress to claude-progress.txt and commits to git.
+  Saves the current session's progress to claude-progress.txt and .claude/project-memory.json, then commits to git.
   Usage: /context-save
-  Updates claude-progress.txt with what was done, what's next, and any issues.
+  Updates both the human-readable progress log and the structured project memory JSON.
   Commits all changes with a descriptive message.
   Run at the end of every work session.
 allowed-tools: Read, Glob, Write, Bash
@@ -73,7 +73,36 @@ git status --short 2>/dev/null || echo ""
 - 없으면 "없음"
 ```
 
-### 3.5단계: feature_list.json 업데이트
+### 3.5단계: .claude/project-memory.json 업데이트
+
+`.claude/project-memory.json` 파일을 생성하거나 업데이트한다:
+
+```json
+{
+  "techStack": "[Unity 버전, C# 버전, Render Pipeline]",
+  "platform": "[Android / iOS / PC / WebGL]",
+  "currentFeature": "[지금 작업 중인 기능명]",
+  "phase": "[설계 중 / 구현 중 / 검증 중 / 완료]",
+  "conventions": {
+    "naming": "m_(private) k_(const) s_(static)",
+    "async": "UniTask",
+    "assets": "Addressables",
+    "events": "ScriptableObject Event Channel"
+  },
+  "decisions": [
+    { "date": "YYYY-MM-DD", "decision": "[결정 내용]", "reason": "[이유]" }
+  ],
+  "blockers": ["[현재 막혀 있는 문제 — 없으면 빈 배열]"],
+  "nextUp": "[다음 작업할 기능명]",
+  "progress": "N/M 기능 완료",
+  "lastUpdated": "YYYY-MM-DD"
+}
+```
+
+기존 파일이 있으면 필드를 병합 업데이트 (decisions 배열은 append).
+ProjectSettings/ProjectVersion.txt 에서 Unity 버전 읽어 techStack 채우기.
+
+### 3.6단계: feature_list.json 업데이트
 
 `feature_list.json` 파일 Read 후:
 - 이번 세션에서 passes: true 로 변경된 항목 확인 및 저장

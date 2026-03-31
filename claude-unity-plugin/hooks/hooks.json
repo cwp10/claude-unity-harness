@@ -6,7 +6,7 @@
         "hooks": [
           {
             "type": "command",
-            "command": "if [ -f claude-progress.txt ]; then echo '=== [claude-unity] 세션 컨텍스트 ===' && cat claude-progress.txt; elif [ -f feature_list.json ]; then echo '=== [claude-unity] 기능 목록 ===' && cat feature_list.json; fi"
+            "command": "if [ -f .claude/project-memory.json ]; then echo '=== [claude-unity] 프로젝트 메모리 ===' && cat .claude/project-memory.json; elif [ -f claude-progress.txt ]; then echo '=== [claude-unity] 세션 컨텍스트 ===' && cat claude-progress.txt; elif [ -f feature_list.json ]; then echo '=== [claude-unity] 기능 목록 ===' && cat feature_list.json; fi"
           }
         ]
       }
@@ -17,7 +17,18 @@
         "hooks": [
           {
             "type": "command",
-            "command": "mkdir -p .claude && if [ ! -f .claude/.context_loaded ]; then if [ -f claude-progress.txt ]; then echo '=== [claude-unity] 세션 컨텍스트 ===' && cat claude-progress.txt; elif [ -f feature_list.json ]; then echo '=== [claude-unity] 기능 목록 ===' && cat feature_list.json; fi; touch .claude/.context_loaded; fi"
+            "command": "mkdir -p .claude && if [ ! -f .claude/.context_loaded ]; then if [ -f .claude/project-memory.json ]; then echo '=== [claude-unity] 프로젝트 메모리 ===' && cat .claude/project-memory.json; elif [ -f claude-progress.txt ]; then echo '=== [claude-unity] 세션 컨텍스트 ===' && cat claude-progress.txt; elif [ -f feature_list.json ]; then echo '=== [claude-unity] 기능 목록 ===' && cat feature_list.json; fi; touch .claude/.context_loaded; fi"
+          }
+        ]
+      }
+    ],
+    "PostToolUse": [
+      {
+        "matcher": "Write",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "python3 -c \"import sys,json,os; d=json.load(sys.stdin); f=d.get('tool_input',{}).get('file_path',''); print('[claude-unity] ⚠️ .meta 파일 없음: ' + f + '.meta\\n→ Unity Editor를 열어 자동 생성하거나 pre-commit hook이 처리합니다.') if f.endswith('.cs') and not os.path.exists(f + '.meta') else None\" 2>/dev/null || true"
           }
         ]
       }

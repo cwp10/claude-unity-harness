@@ -13,8 +13,10 @@ Unity 프로젝트를 위한 Claude Code CLI 전용 플러그인.
 | 커맨드 | cost | 설명 |
 |--------|------|------|
 | `/setup` | sonnet | Unity 프로젝트 초기화 (최초 1회) |
-| `/context-load` | haiku | 세션 시작 — 진행 상황 복구 |
-| `/context-save` | haiku | 세션 종료 — 진행 상황 저장 + 커밋 |
+| `/setup-check` | haiku | 플러그인·hook·하네스 파일 설치 상태 진단 |
+| `/deep-interview [기능명]` | sonnet | /plan 전 요구사항 명확화 |
+| `/context-load` | haiku | 세션 시작 — project-memory.json + 진행 상황 복구 |
+| `/context-save` | haiku | 세션 종료 — project-memory.json + 진행 상황 저장 + 커밋 |
 | `/plan [기능명]` | opus | 설계 플랜 생성 (codebase-explorer → architect-planner) |
 | `/review [파일]` | opus | 코드 리뷰 (codebase-explorer → unity-reviewer) |
 | `/audit` | opus | 전체 감사 (코드 품질 + 빌드 체크 병렬 실행) |
@@ -42,13 +44,16 @@ Unity 프로젝트를 위한 Claude Code CLI 전용 플러그인.
 | `codebase-explorer` | haiku | /plan, /review, /refactor, /analyze |
 | `debugger` | sonnet | /debug |
 | `doc-writer` | sonnet | /doc |
+| `verifier` | sonnet | 기능 구현 완료 후 자동 검증 |
 
 ### Hooks (자동 실행)
 
 | 이벤트 | 동작 |
 |--------|------|
-| `SessionStart` | claude-progress.txt 또는 feature_list.json 자동 로드 |
+| `SessionStart` | project-memory.json → claude-progress.txt 순으로 자동 로드 |
+| `UserPromptSubmit` | 첫 메시지 시 컨텍스트 로드 (SessionStart 폴백, 중복 방지) |
 | `PreToolUse (Write\|Edit *.cs)` | Unity C# 네이밍·코딩 규칙 컨텍스트 주입 |
+| `PostToolUse (Write *.cs)` | 신규 .cs 파일 생성 시 .meta 누락 경고 |
 | `pre-commit (git hook)` | .meta 확인 → 컴파일 → 코드 리뷰 → 문서 자동화 |
 
 ---
@@ -63,6 +68,9 @@ claude plugin install claude-unity.plugin
 
 # Unity 프로젝트 루트에서 초기화 (최초 1회)
 /setup
+
+# 설치 상태 확인
+/setup-check
 ```
 
 ### pre-commit hook
@@ -79,17 +87,20 @@ chmod +x .git/hooks/pre-commit
 
 ```
 새 세션 시작
-  → SessionStart hook 자동 실행 (진행 상황 로드)
+  → SessionStart hook 자동 실행 (project-memory.json 로드)
   → /context-load               (수동 복구 시)
 
 기능 개발
+  → /deep-interview [기능명]    (요구사항 불명확 시 — 선택)
   → /plan [기능명]              (설계 플랜 → 승인 → 구현)
   → 코드 작성 (PreToolUse hook: C# 규칙 자동 주입)
+  →           (PostToolUse hook: .meta 누락 자동 경고)
   → /review [파일]              (코드 리뷰)
-  → /audit                      (전체 감사)
+  → verifier 에이전트           (스펙 충족 검증 → passes: true)
+  → /audit                      (전체 감사 — 배포 전)
 
 세션 종료
-  → /context-save               (진행 상황 저장 + 커밋)
+  → /context-save               (project-memory.json + git 커밋)
 
 git commit 시 자동 실행
   → pre-commit hook
@@ -115,6 +126,35 @@ git commit 시 자동 실행
 | "커밋 메시지", "변경사항 정리" | `/git-summary` |
 | "세션 시작", "이어서 작업" | `/context-load` |
 | "오늘 마무리", "작업 저장" | `/context-save` |
+| "요구사항 정리", "뭘 만들어야 할지" | `/deep-interview` |
+| "설치 확인", "환경 점검" | `/setup-check` |
+
+---
+
+## 프로젝트 메모리 구조 (.claude/project-memory.json)
+
+OMC의 project-memory.json 패턴 적용. `/context-save` 시 자동 생성·업데이트.
+
+```json
+{
+  "techStack": "Unity 6 LTS, C# 9.0, URP",
+  "platform": "Android/iOS",
+  "currentFeature": "인벤토리 시스템",
+  "phase": "구현 중",
+  "conventions": {
+    "naming": "m_(private) k_(const) s_(static)",
+    "async": "UniTask",
+    "assets": "Addressables"
+  },
+  "decisions": [
+    { "date": "2026-03-31", "decision": "씬 관리에 Addressables 사용", "reason": "Resources.Load 성능 문제" }
+  ],
+  "blockers": [],
+  "nextUp": "전투 시스템",
+  "progress": "2/8 기능 완료",
+  "lastUpdated": "2026-03-31"
+}
+```
 
 ---
 
@@ -123,7 +163,7 @@ git commit 시 자동 실행
 - Claude Code CLI
 - Unity 6 LTS (6000.0.x)
 - Git Bash (Windows)
-- Python 3 (hooks.json의 PreToolUse 훅 동작에 필요)
+- Python 3 (hooks.json의 PreToolUse / PostToolUse 훅 동작에 필요)
 - `claude` CLI가 PATH에 등록 (pre-commit 리뷰 동작에 필요)
 
 ---
@@ -139,9 +179,9 @@ claude-unity-plugin/
 ├── engines/unity.md         ← Unity 6 스크립트 규칙
 ├── languages/csharp.md      ← C# 스타일 가이드
 ├── domains/unity.md         ← Unity 도메인 패턴
-├── skills/                  ← 슬래시 커맨드 (11개)
-├── agents/                  ← 위임 에이전트 (5개)
+├── skills/                  ← 슬래시 커맨드 (13개)
+├── agents/                  ← 위임 에이전트 (6개)
 └── hooks/
-    ├── hooks.json           ← Claude Code 훅 (SessionStart, PreToolUse)
+    ├── hooks.json           ← Claude Code 훅 (SessionStart, UserPromptSubmit, PreToolUse, PostToolUse)
     └── pre-commit           ← Git pre-commit 스크립트
 ```

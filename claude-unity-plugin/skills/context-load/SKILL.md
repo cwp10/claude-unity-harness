@@ -1,9 +1,9 @@
 ---
 name: context-load
 description: >
-  Loads session context by reading claude-progress.txt and git history.
+  Loads session context by reading .claude/project-memory.json, claude-progress.txt, and git history.
   Usage: /context-load
-  Runs the standard session startup routine: read progress file, check git log,
+  Runs the standard session startup routine: read project memory, check git log,
   verify current state, then present what to work on next.
   Run at the start of every work session to get up to speed.
 allowed-tools: Read, Glob, Bash
@@ -23,11 +23,13 @@ keywords: [session, context, progress, resume]
 pwd
 ```
 
-### 2단계: claude-progress.txt 읽기
+### 2단계: project-memory.json 읽기 (우선)
 
-`claude-progress.txt` 파일 Read.
+`.claude/project-memory.json` Read (있으면 — 가장 구조화된 컨텍스트).
 
-파일 없음 → "claude-progress.txt 가 없습니다. /setup 으로 프로젝트를 초기화하세요." 출력 후 종료.
+없으면 → `claude-progress.txt` Read.
+
+둘 다 없으면 → "/setup 으로 프로젝트를 초기화하세요." 출력 후 종료.
 
 ### 2.5단계: feature_list.json 읽기
 
