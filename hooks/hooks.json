@@ -30,7 +30,7 @@
         "hooks": [
           {
             "type": "command",
-            "command": "python3 -c \"\nimport json, subprocess, datetime, os\nmem = '.claude/project-memory.json'\ntry:\n    changed = subprocess.check_output(['git', 'diff', '--name-only', 'HEAD'], text=True).strip().split('\\n')\n    changed = [f for f in changed if f]\nexcept:\n    changed = []\nnow = datetime.datetime.utcnow().strftime('%Y-%m-%dT%H:%M:%SZ')\nif os.path.exists(mem):\n    with open(mem) as f:\n        data = json.load(f)\nelse:\n    data = {'currentFeature':'','currentStep':'','changedFiles':[],'decisions':[],'criticalIssues':[],'nextAction':'','savedAt':''}\ndata['changedFiles'] = changed\ndata['savedAt'] = now\nwith open(mem, 'w', encoding='utf-8') as f:\n    json.dump(data, f, ensure_ascii=False, indent=2)\n\"",
+            "command": "mkdir -p .claude && NOW=$(date -u '+%Y-%m-%dT%H:%M:%SZ') && MEM=.claude/project-memory.json && CF=$(git status --porcelain 2>/dev/null | awk '{print $NF}' | grep -v '^$' | awk 'BEGIN{ORS=\",\"}{print \"\\\"\" $0 \"\\\"\"}' | sed 's/,$//') && if [ -f $MEM ]; then sed -i 's/\"savedAt\":\"[^\"]*\"/\"savedAt\":\"'\"$NOW\"'\"/' $MEM || true; else printf '{\"currentFeature\":\"\",\"changedFiles\":[%s],\"savedAt\":\"%s\"}\\n' \"$CF\" \"$NOW\" > $MEM; fi",
             "timeout": 5
           }
         ]
