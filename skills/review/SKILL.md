@@ -1,9 +1,9 @@
 ---
 name: review
 description: >
-  Orchestrates codebase-explorer then unity-reviewer in sequence.
-  codebase-explorer maps related files first, then review is performed
-  with full context of dependencies and related classes.
+  Orchestrates codebase-explorer and unity-reviewer concurrently.
+  codebase-explorer maps related files in parallel with context gathering,
+  then unity-reviewer performs the review with full dependency context.
   Usage: /review [filepath]
   Example: /review Assets/_Project/Scripts/Game/PlayerController.cs
   If no file specified, auto-detects recently changed .cs files.

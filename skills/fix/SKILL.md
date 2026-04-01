@@ -1,11 +1,11 @@
 ---
 name: fix
 description: >
-  Diagnoses errors and bugs in Unity C# code by analyzing stack traces, error messages, and related code.
+  Routes Unity C# errors to the debugger agent for diagnosis and fix.
+  Parses stack traces and file paths, delegates to debugger agent, then validates the result.
   Usage: /fix [오류 메시지 또는 파일경로]
   Example: /fix NullReferenceException at PlayerController.cs:42
   Example: /fix Assets/_Project/Scripts/Game/PlayerController.cs
-  Provides root cause analysis and corrected code.
   Do NOT use for new feature development or code review — use /plan or /review.
 tools: Read, Glob, Grep, Bash, Write
 model: sonnet

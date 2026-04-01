@@ -1,7 +1,7 @@
 ---
 name: doc
 description: >
-  Unity 프로젝트 문서를 생성한다. 서브커맨드로 문서 종류를 지정한다.
+  서브커맨드를 라우팅해 doc-writer 에이전트에 위임하거나 직접 문서를 생성한다. 서브커맨드로 문서 종류를 지정한다.
   Usage:
     /doc readme                   ← 프로젝트 README.md 자동 생성
     /doc handover [시스템명]      ← 외주 개발자용 인수인계 문서
