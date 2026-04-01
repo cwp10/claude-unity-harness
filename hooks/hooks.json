@@ -30,7 +30,7 @@
         "hooks": [
           {
             "type": "command",
-            "command": "mkdir -p .claude && NOW=$(date -u '+%Y-%m-%dT%H:%M:%SZ') && MEM=.claude/project-memory.json && CF=$(git status --porcelain 2>/dev/null | awk '{print $NF}' | grep -v '^$' | awk 'BEGIN{ORS=\",\"}{print \"\\\"\" $0 \"\\\"\"}' | sed 's/,$//') && if [ -f $MEM ]; then sed -i 's/\"savedAt\":\"[^\"]*\"/\"savedAt\":\"'\"$NOW\"'\"/' $MEM || true; else printf '{\"currentFeature\":\"\",\"changedFiles\":[%s],\"savedAt\":\"%s\"}\\n' \"$CF\" \"$NOW\" > $MEM; fi",
+            "command": "mkdir -p .claude && NOW=$(date -u '+%Y-%m-%dT%H:%M:%SZ') && MEM=.claude/project-memory.json && CF=$(git status --porcelain 2>/dev/null | awk '{print $NF}' | grep -v '^$' | awk 'BEGIN{ORS=\",\"}{print \"\\\"\" $0 \"\\\"\"}' | sed 's/,$//') && if [ -f $MEM ]; then if [ \"$(uname)\" = \"Darwin\" ]; then sed -i '' 's/\"savedAt\":\"[^\"]*\"/\"savedAt\":\"'\"$NOW\"'\"/' $MEM || true; else sed -i 's/\"savedAt\":\"[^\"]*\"/\"savedAt\":\"'\"$NOW\"'\"/' $MEM || true; fi; else printf '{\"currentFeature\":\"\",\"changedFiles\":[%s],\"savedAt\":\"%s\"}\\n' \"$CF\" \"$NOW\" > $MEM; fi",
             "timeout": 5
           }
         ]

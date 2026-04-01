@@ -1,7 +1,7 @@
 #!/bin/sh
 # ============================================================
 # Claude Code 코드 리뷰 + 자동 문서화 pre-commit hook (Unity 전용)
-# Git for Windows (Git Bash) 환경에서 동작
+# Windows (Git Bash) / macOS 크로스 플랫폼 지원
 #
 # 흐름:
 #   1. .meta 누락 파일 감지 → 자동 git add
@@ -160,20 +160,23 @@ if [ "$COMPILE_CHECKED" = false ]; then
         if [ -f ".claude/CLAUDE.md" ]; then
             CUSTOM_PATH=$(grep "UNITY_PATH:" ".claude/CLAUDE.md" | sed 's/.*UNITY_PATH: *//' | tr -d '\r')
             if [ -n "$CUSTOM_PATH" ]; then
-                UNITY_EXE=$(echo "$CUSTOM_PATH" | sed 's|\\|/|g' | sed 's|^\([A-Za-z]\):|/\L\1|')
+                UNITY_EXE=$(echo "$CUSTOM_PATH" | sed 's|\\|/|g' | sed 's|^\([A-Za-z]\):|/\1|' | tr '[:upper:]' '[:lower:]')
                 printf "  Unity.exe (CLAUDE.md): %s\n" "$UNITY_EXE"
             fi
         fi
 
-        # 2순위: 기본 Hub 설치 경로 탐색
+        # 2순위: 기본 Hub 설치 경로 탐색 (Windows / macOS)
         if [ -z "$UNITY_EXE" ] || [ ! -f "$UNITY_EXE" ]; then
             UNITY_EXE=""
             UNITY_EXE_C="/c/Program Files/Unity/Hub/Editor/${UNITY_VERSION}/Editor/Unity.exe"
             UNITY_EXE_D="/d/Program Files/Unity/Hub/Editor/${UNITY_VERSION}/Editor/Unity.exe"
+            UNITY_EXE_MAC="/Applications/Unity/Hub/Editor/${UNITY_VERSION}/Unity.app/Contents/MacOS/Unity"
             if [ -f "$UNITY_EXE_C" ]; then
                 UNITY_EXE="$UNITY_EXE_C"
             elif [ -f "$UNITY_EXE_D" ]; then
                 UNITY_EXE="$UNITY_EXE_D"
+            elif [ -f "$UNITY_EXE_MAC" ]; then
+                UNITY_EXE="$UNITY_EXE_MAC"
             fi
         fi
     fi
@@ -188,7 +191,7 @@ if [ "$COMPILE_CHECKED" = false ]; then
         printf "  Unity.exe: %s\n" "$UNITY_EXE"
         printf "  컴파일 검증 중... batchmode (최대 60초)\n\n"
 
-        COMPILE_LOG=".claude/compile_$(date +%Y%m%d_%H%M%S).log"
+        COMPILE_LOG=".claude/compile_$(date -u +%Y%m%d_%H%M%S).log"
         mkdir -p ".claude"
 
         COMPILE_EXIT=0
@@ -296,9 +299,9 @@ Critical 이슈가 있을 때만 작성" \
 
         REVIEW_DIR="docs/analysis"
         mkdir -p "$REVIEW_DIR"
-        REVIEW_FILE="${REVIEW_DIR}/review_$(date +%Y%m%d_%H%M%S).md"
+        REVIEW_FILE="${REVIEW_DIR}/review_$(date -u +%Y%m%d_%H%M%S).md"
         printf "# 커밋 전 코드 리뷰\n날짜: %s\n파일 수: %d\n\n%s\n" \
-            "$(date '+%Y-%m-%d %H:%M:%S')" "$FILE_COUNT" \
+            "$(date -u '+%Y-%m-%d %H:%M:%S') UTC" "$FILE_COUNT" \
             "$REVIEW_OUTPUT" > "$REVIEW_FILE"
 
         printf "%s\n\n" "$REVIEW_OUTPUT"
@@ -331,7 +334,7 @@ if [ -z "$CLAUDE_CMD" ]; then
     printf "${YELLOW}claude CLI 없음. 문서화 생략.${NC}\n\n"
 else
     mkdir -p "docs/analysis"
-    COMMIT_DATE=$(date '+%Y-%m-%d')
+    COMMIT_DATE=$(date -u '+%Y-%m-%d')
     PROCESSED_DIRS=""
 
     while IFS= read -r FILE; do
