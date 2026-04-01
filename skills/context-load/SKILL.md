@@ -6,8 +6,8 @@ description: >
   Runs the standard session startup routine: read project memory, check git log,
   verify current state, then present what to work on next.
   Run at the start of every work session to get up to speed.
-allowed-tools: Read, Glob, Bash
-cost: haiku
+tools: Read, Glob, Bash
+model: haiku
 triggers:
   - "세션 시작"
   - "이어서 작업"

@@ -4,7 +4,7 @@ description: >
   Unity 콘솔 로그를 읽어 에러·경고를 분류하고 원인 분석 및 수정 방법을 제안합니다.
   UnityMCP read_console 툴을 사용합니다.
   Usage: /unity-console
-allowed-tools: mcp__UnityMCP__read_console, mcp__UnityMCP__find_in_file, Read, Glob, Grep
+tools: mcp__UnityMCP__read_console, mcp__UnityMCP__find_in_file, Read, Glob, Grep
 triggers:
   - "콘솔 확인"
   - "에러 확인"

@@ -5,7 +5,7 @@ description: >
   누락 컴포넌트, 네이밍 규칙 위반, 성능 이슈, 구조적 문제를 점검합니다.
   UnityMCP manage_scene, find_gameobjects 툴을 사용합니다.
   Usage: /unity-scene-audit
-allowed-tools: mcp__UnityMCP__manage_scene, mcp__UnityMCP__find_gameobjects, mcp__UnityMCP__manage_components, mcp__UnityMCP__read_console, Read, Glob
+tools: mcp__UnityMCP__manage_scene, mcp__UnityMCP__find_gameobjects, mcp__UnityMCP__manage_components, mcp__UnityMCP__read_console, Read, Glob
 triggers:
   - "씬 검사"
   - "씬 점검"

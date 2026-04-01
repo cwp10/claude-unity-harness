@@ -5,7 +5,7 @@ description: >
   Strategy, Flyweight, Dirty Flag, Object Pool, SO Event Channel, UniTask, and MVP patterns.
   Loads automatically when writing, designing, or refactoring Unity C# code.
   Do NOT use for web, TypeScript, or non-Unity projects.
-allowed-tools: Read, Glob, Grep
+tools: Read, Glob, Grep
 user-invocable: false
 ---
 

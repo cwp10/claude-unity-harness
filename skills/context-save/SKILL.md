@@ -6,8 +6,8 @@ description: >
   Updates both the human-readable progress log and the structured project memory JSON.
   Commits all changes with a descriptive message.
   Run at the end of every work session.
-allowed-tools: Read, Glob, Write, Bash, mcp__UnityMCP__run_tests, mcp__UnityMCP__read_console
-cost: haiku
+tools: Read, Glob, Write, Bash, mcp__UnityMCP__run_tests, mcp__UnityMCP__read_console
+model: haiku
 triggers:
   - "세션 종료"
   - "작업 저장"

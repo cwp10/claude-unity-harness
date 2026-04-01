@@ -5,8 +5,8 @@ description: >
   Usage: /setup-check
   pre-commit hook, CLAUDE.md 설정, 하네스 파일, Unity 폴더 구조를 점검한다.
   문제 항목은 수정 방법과 함께 출력한다.
-allowed-tools: Read, Glob, Bash
-cost: haiku
+tools: Read, Glob, Bash
+model: haiku
 triggers:
   - "설치 확인"
   - "세팅 확인"

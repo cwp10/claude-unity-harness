@@ -7,8 +7,8 @@ description: >
   Example: /deep-interview 보스 전투 패턴
   모호한 요구사항에 3~5개 질문으로 명확화 후 /plan 으로 자동 연결.
   요구사항이 이미 명확하면 바로 /plan 실행.
-allowed-tools: Read, Glob, Grep
-cost: sonnet
+tools: Read, Glob, Grep
+model: sonnet
 triggers:
   - "요구사항 정리"
   - "뭘 만들어야 할지"

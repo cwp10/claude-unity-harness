@@ -4,7 +4,7 @@ description: >
   Unity Test Runner를 실행하고 결과를 분석합니다. 실패 항목의 원인과 수정 방법을 제안합니다.
   UnityMCP run_tests 툴을 사용합니다.
   Usage: /unity-test [EditMode|PlayMode|All] (기본: EditMode)
-allowed-tools: mcp__UnityMCP__run_tests, mcp__UnityMCP__read_console, mcp__UnityMCP__find_in_file, Read, Glob, Grep
+tools: mcp__UnityMCP__run_tests, mcp__UnityMCP__read_console, mcp__UnityMCP__find_in_file, Read, Glob, Grep
 triggers:
   - "테스트 실행"
   - "테스트 돌려줘"

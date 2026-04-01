@@ -7,8 +7,8 @@ description: >
   Usage: /plan [feature description]
   Example: /plan 인벤토리 시스템
   Example: /plan 보스 전투 패턴
-allowed-tools: Read, Glob, Grep, Write
-cost: opus
+tools: Read, Glob, Grep, Write
+model: opus
 triggers:
   - "설계해줘"
   - "아키텍처"

@@ -8,8 +8,8 @@ description: >
     /doc delivery [버전] [납품일] ← 클라이언트 납품 문서
   Example: /doc handover CombatSystem
   Example: /doc delivery v1.0.0 2025-06-01
-allowed-tools: Read, Glob, Grep, Bash, Write
-cost: sonnet
+tools: Read, Glob, Grep, Bash, Write
+model: sonnet
 triggers:
   - "문서 만들어줘"
   - "README"

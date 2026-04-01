@@ -7,8 +7,8 @@ description: >
   Usage: /analyze [분석 대상]
   Example: /analyze 인벤토리 시스템
   Example: /analyze Assets/_Project/Scripts/Game/Combat/
-allowed-tools: Read, Glob, Grep, Write, Bash
-cost: sonnet
+tools: Read, Glob, Grep, Write, Bash
+model: sonnet
 triggers:
   - "분석해줘"
   - "어떻게 동작해"

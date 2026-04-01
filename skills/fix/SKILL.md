@@ -7,8 +7,8 @@ description: >
   Example: /fix Assets/_Project/Scripts/Game/PlayerController.cs
   Provides root cause analysis and corrected code.
   Do NOT use for new feature development or code review — use /plan or /review.
-allowed-tools: Read, Glob, Grep, Bash, Write
-cost: sonnet
+tools: Read, Glob, Grep, Bash, Write
+model: sonnet
 triggers:
   - "에러"
   - "버그"

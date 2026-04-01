@@ -8,8 +8,8 @@ description: >
   Detects scale (Small/Medium/Large) and either fixes directly or presents a plan first.
   Saves refactoring history to docs/refactor/ on completion.
   Do NOT use for new feature development — use /plan instead.
-allowed-tools: Read, Glob, Grep, Write, Bash
-cost: opus
+tools: Read, Glob, Grep, Write, Bash
+model: opus
 triggers:
   - "리팩토링"
   - "코드 정리"

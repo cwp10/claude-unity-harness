@@ -5,8 +5,8 @@ description: >
   Usage: /audit
   Unity: code quality audit (unity-reviewer) + .meta files, compile errors, folder structure.
   Both tasks run concurrently.
-allowed-tools: Read, Glob, Grep, Bash, Write
-cost: sonnet
+tools: Read, Glob, Grep, Bash, Write
+model: sonnet
 triggers:
   - "전체 감사"
   - "빌드 체크"

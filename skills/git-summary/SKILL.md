@@ -4,8 +4,8 @@ description: >
   Git 변경사항을 분석해 논리적 커밋 단위와 메시지를 제안한다.
   세션 종료·진행 상황 저장은 /context-save 사용.
   이 스킬은 커밋 메시지 작성과 단위 분리만 담당한다.
-allowed-tools: Bash, Read
-cost: haiku
+tools: Bash, Read
+model: haiku
 triggers:
   - "커밋 메시지"
   - "오늘 작업 정리"

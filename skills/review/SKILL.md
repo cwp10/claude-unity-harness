@@ -7,8 +7,8 @@ description: >
   Usage: /review [filepath]
   Example: /review Assets/_Project/Scripts/Game/PlayerController.cs
   If no file specified, auto-detects recently changed .cs files.
-allowed-tools: Read, Grep, Glob, Bash, Write
-cost: sonnet
+tools: Read, Grep, Glob, Bash, Write
+model: sonnet
 triggers:
   - "리뷰해줘"
   - "코드 검토"
