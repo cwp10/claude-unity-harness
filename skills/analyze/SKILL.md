@@ -44,7 +44,11 @@ keywords: [analyze, explain, understand, codebase, system]
 |----------|------------|------|
 
 ### 동작 흐름
-주요 로직 순서
+
+```mermaid
+flowchart TD
+    %% 실제 코드 흐름을 Mermaid로 작성
+```
 
 ### 설계 패턴
 사용된 패턴
@@ -117,6 +121,11 @@ keywords: [analyze, explain, understand, codebase, system]
 |----------|--------|------|
 
 ## 동작 흐름
+
+```mermaid
+flowchart TD
+    %% 실제 코드 흐름을 Mermaid로 작성
+```
 
 ## 설계 패턴
 

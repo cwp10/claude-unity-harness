@@ -197,7 +197,11 @@ Assets/
 interface, abstract class, virtual 메서드 목록
 
 ## 7. 의존성 맵
-(이 시스템이 참조하는 것 / 이 시스템을 참조하는 것)
+
+```mermaid
+graph LR
+    %% 이 시스템이 참조하는 것 / 이 시스템을 참조하는 것
+```
 
 ## 8. 연락처
 (작성자 칸)

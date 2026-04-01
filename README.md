@@ -183,12 +183,14 @@ claude-unity-harness/
 4. 승인 시: `docs/architecture/기능명-설계.md` 저장 + `.claude/feature_list.json`에 `passes: false`로 항목 추가.
 5. 단계별 코드 구현 시작.
 
-```
-/plan 인벤토리 시스템
-→ [탐색] 기존 아이템·UI·저장 시스템 파악
-→ [설계] 클래스 다이어그램 + 대안 2가지 제시
-→ [승인] "이 설계로 진행할까요?"
-→ [구현] 단계별 코드 생성
+```mermaid
+flowchart LR
+    A[/plan 인벤토리 시스템] --> B[codebase-explorer\n기존 코드 탐색]
+    B --> C[architect-planner\n설계 플랜 + 대안 2가지]
+    C --> D{승인?}
+    D -- 거절 --> C
+    D -- 승인 --> E[docs/architecture/ 저장\nfeature_list.json 항목 추가]
+    E --> F[단계별 코드 구현]
 ```
 
 ---
@@ -253,26 +255,22 @@ claude-unity-harness/
 
 `git commit` 실행 시 **자동으로 3단계**가 실행됩니다.
 
-```
-[0/3] .meta 파일 확인
-  .cs·prefab·asset 파일의 .meta가 없으면 자동 git add
-  여전히 누락이면 → 커밋 차단
-
-[1/3] Unity 컴파일 검증
-  ProjectSettings/ProjectVersion.txt 에서 Unity 버전 확인
-  Unity.exe -batchmode 로 컴파일 에러 검사
-  에러 발생 시 → 커밋 차단
-
-[2/3] 코드 리뷰 (커밋 단위 일괄)
-  변경된 .cs 파일 전체를 하나의 단위로 리뷰
-  파일 간 연관성(인터페이스 불일치, 이벤트 구독 누락)도 검사
-  Critical 발견 시 → 커밋 차단 + docs/analysis/에 리뷰 저장
-  Critical 없으면 → 통과
-
-[3/3] 문서 자동화
-  Critical 없이 통과한 경우에만 실행
-  변경 파일 디렉토리 단위로 기능 분석 문서 생성·업데이트
-  docs/analysis/ 에 저장 후 커밋에 포함
+```mermaid
+flowchart TD
+    A([git commit]) --> B["[0/3] .meta 파일 확인"]
+    B --> C{누락 있음?}
+    C -- 자동 추가 가능 --> D[git add .meta]
+    D --> E{여전히 누락?}
+    E -- Yes --> BLOCK1([❌ 커밋 차단])
+    E -- No --> F
+    C -- 없음 --> F["[1/3] Unity 컴파일 검증\nMCP → batchmode 순서로 확인"]
+    F --> G{컴파일 에러?}
+    G -- Yes --> BLOCK2([❌ 커밋 차단])
+    G -- No --> H["[2/3] 코드 리뷰\n변경 .cs 파일 일괄 리뷰"]
+    H --> I{Critical?}
+    I -- Yes --> BLOCK3([❌ 커밋 차단])
+    I -- No --> J["[3/3] 문서 자동화\ndocs/analysis/ 생성·업데이트"]
+    J --> K([✅ 커밋 완료])
 ```
 
 커밋 메시지는 `/git-summary`로 논리적 단위와 메시지를 제안받을 수 있습니다.
@@ -288,63 +286,47 @@ git commit --no-verify -m "[hotfix] 긴급 수정"
 
 ### 새 프로젝트 시작
 
-```
-1. /setup
-   Unity 버전·스택 설정, hook 설치, .claude/feature_list.json 생성
-
-2. /deep-interview
-   요구사항 구조화 + .claude/feature_list.json 항목 채우기
+```mermaid
+flowchart LR
+    A([프로젝트 루트]) --> B[/setup\nCLAUDE.md + hook 설치\nfeature_list.json 생성]
+    B --> C[/deep-interview\n요구사항 구조화\nfeature_list.json 항목 채우기]
+    C --> D([개발 시작])
 ```
 
 ### 매 작업 세션 흐름
 
-```
-세션 시작 (자동)
-  Claude Code 대화 열기
-  → SessionStart hook: project-memory.json · .claude/claude-progress.txt 자동 주입
-  → 필요 시 /context-load 로 복구 요약 + 다음 작업 제안
+```mermaid
+flowchart TD
+    START([Claude Code 실행]) --> SI[SessionStart hook\n세 파일 컨텍스트 자동 주입]
+    SI --> CL{복구 요약\n필요?}
+    CL -- Yes --> CLL[/context-load\n상태 정리 + 다음 작업 제안]
+    CL -- No --> DEV
+    CLL --> DEV
 
-기능 개발 (.claude/feature_list.json의 passes: false 항목 1개씩)
-  /plan 기능명
-  → 설계 플랜 확인 + 승인
-  → 코드 구현 (PreToolUse hook: Unity C# 규칙 자동 주입)
-  /review 파일경로
-  → Critical 0건 확인
-  → verifier로 passes: true 처리
+    DEV[feature_list에서\npasses:false 항목 선택] --> PLAN[/plan 기능명]
+    PLAN --> CODE[코드 구현\nPreToolUse: C# 규칙 자동 주입]
+    CODE --> REVIEW[/review\nCritical 0건 확인]
+    REVIEW --> VERIFY[verifier\npasses:true 판정]
+    VERIFY --> MORE{다음 기능?}
+    MORE -- Yes --> DEV
+    MORE -- No --> END
 
-코드 품질 관리
-  /refactor 대상
-  → 규모 판단 후 즉시 수정 또는 플랜 제시
-  /audit
-  → 전체 코드베이스 감사 + 빌드 체크
+    CODE -.->|매 응답| STOP[Stop hook\nsavedAt 갱신 - 비용 0]
+    CODE -.->|컨텍스트 압축 시| COMPACT[PreCompact hook\nproject-memory + progress 갱신]
 
-세션 중 자동 저장 (hooks)
-  → Stop hook: 매 응답 완료 후 savedAt 타임스탬프 갱신 (비용 $0)
-  → PreCompact hook: 컨텍스트 압축 직전 project-memory.json + claude-progress.txt 동시 갱신
-
-세션 종료
-  대화 닫기
-  → SessionEnd hook: claude-progress.txt에 날짜 플레이스홀더 즉시 기록 (자동)
-  → 다음 PreCompact 시 플레이스홀더를 실제 작업 내용으로 자동 보완
-  /context-save (선택 — 즉시 상세 저장 + git commit 필요 시)
-  → .claude/claude-progress.txt + project-memory.json 즉시 상세 저장
-  → git commit (세션 내용 자동 커밋)
-
-git commit 시 자동 실행
-  [0] .meta 파일 확인
-  [1] Unity 컴파일 검증
-  [2] 코드 리뷰 (Critical 발견 시 차단)
-  [3] 문서 자동 생성
+    END([대화 종료]) --> SE[SessionEnd hook\nclaude-progress.txt\n플레이스홀더 자동 기록]
+    SE --> CS{즉시 저장\n+ 커밋 필요?}
+    CS -- Yes --> CSave[/context-save\n상세 저장 + git commit]
+    CS -- No --> DONE([완료])
+    CSave --> DONE
 ```
 
 ### 외주·납품 시
 
-```
-/doc handover 시스템명
-→ 외주 개발자용 인수인계 문서 (역할·API·주의사항·의존성 맵)
-
-/doc delivery v1.0.0 2025-06-01
-→ 클라이언트 납품 문서 (구현 기능 목록·실행 방법·제한사항)
+```mermaid
+flowchart LR
+    A[/doc handover 시스템명] --> B[docs/guide/HANDOVER_*.md\n역할·API·주의사항·의존성 맵]
+    C[/doc delivery v1.0.0 날짜] --> D[docs/guide/DELIVERY_*.md\n구현 기능·실행 방법·제한사항]
 ```
 
 ---
