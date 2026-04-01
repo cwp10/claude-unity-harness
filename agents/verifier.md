@@ -99,6 +99,19 @@ UnityMCP 툴 사용 가능 여부에 따라 분기한다.
 수정 후 다시 검증하거나 /review 로 상세 리뷰를 받으세요.
 ```
 
-### 5단계: .claude/feature_list.json 업데이트
+### 5단계: .claude/feature_list.json 업데이트 (PASS 시 필수)
 
-PASS 시 해당 기능 항목의 `passes: false` → `passes: true` 로 Write.
+**이 단계는 PASS 판정 시 반드시 실행한다. 건너뛰지 않는다.**
+
+1. `.claude/feature_list.json` Read
+2. 검증한 기능명과 일치하는 항목 탐색
+   - `name` 필드 또는 `feature` 필드로 매칭
+   - 불일치 시 `.claude/project-memory.json`의 `currentFeature` 값으로 재탐색
+3. 해당 항목의 `"passes": false` → `"passes": true` 로 변경 후 Write
+4. 전체 진행률 계산:
+   - `passes: true` 항목 수 / 전체 항목 수
+   - `"N/M 기능 완료 (passes: true)"` 형식으로 출력
+5. `.claude/project-memory.json` Read → `progress` 필드 갱신 후 Write
+
+**feature_list.json 파일이 없으면:**
+- `[WARN] .claude/feature_list.json 없음 — passes 갱신 생략` 출력 후 종료
