@@ -32,6 +32,11 @@
             "type": "command",
             "command": "mkdir -p .claude && NOW=$(date -u '+%Y-%m-%dT%H:%M:%SZ') && MEM=.claude/project-memory.json && CF=$(git status --porcelain 2>/dev/null | awk '{print $NF}' | grep -v '^$' | awk 'BEGIN{ORS=\",\"}{print \"\\\"\" $0 \"\\\"\"}' | sed 's/,$//') && if [ -f $MEM ]; then if [ \"$(uname)\" = \"Darwin\" ]; then sed -i '' 's/\"savedAt\":\"[^\"]*\"/\"savedAt\":\"'\"$NOW\"'\"/' $MEM || true; else sed -i 's/\"savedAt\":\"[^\"]*\"/\"savedAt\":\"'\"$NOW\"'\"/' $MEM || true; fi; else printf '{\"currentFeature\":\"\",\"changedFiles\":[%s],\"savedAt\":\"%s\"}\\n' \"$CF\" \"$NOW\" > $MEM; fi",
             "timeout": 5
+          },
+          {
+            "type": "agent",
+            "prompt": "세션 종료 시 현재 작업 상태를 .claude/project-memory.json에 저장하세요. 대화 내용을 바탕으로 아래 형식으로 작성하세요:\n{\n  \"currentFeature\": \"작업 중인 기능명 (없으면 빈 문자열)\",\n  \"currentStep\": \"현재 진행 단계\",\n  \"changedFiles\": [\"변경된 파일 경로 목록\"],\n  \"decisions\": [\"내린 설계 결정과 이유\"],\n  \"criticalIssues\": [\"발견된 Critical 이슈\"],\n  \"nextAction\": \"다음 세션에서 할 작업\",\n  \"savedAt\": \"현재 UTC 시각 (ISO 8601)\"\n}\n규칙:\n- 대화가 짧거나 실질적 작업 내용이 없으면 기존 파일의 savedAt만 갱신하고 나머지 필드는 유지\n- 기존 파일이 있으면 최신 내용으로 갱신 (decisions 배열은 append)\n- changedFiles는 git status --porcelain 으로 확인\n- 저장 완료 후 '[context-save] project-memory.json 갱신 완료' 한 줄만 출력",
+            "timeout": 60
           }
         ]
       }
