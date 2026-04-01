@@ -185,7 +185,7 @@ if [ "$COMPILE_CHECKED" = false ]; then
             fi
         fi
 
-        # 2순위: 기본 Hub 설치 경로 탐색 (Windows / macOS)
+        # 2순위: 기본 Hub 설치 경로 탐색 — 정확한 버전 매칭 (Windows / macOS)
         if [ -z "$UNITY_EXE" ] || [ ! -f "$UNITY_EXE" ]; then
             UNITY_EXE=""
             UNITY_EXE_C="/c/Program Files/Unity/Hub/Editor/${UNITY_VERSION}/Editor/Unity.exe"
@@ -198,6 +198,30 @@ if [ "$COMPILE_CHECKED" = false ]; then
             elif [ -f "$UNITY_EXE_MAC" ]; then
                 UNITY_EXE="$UNITY_EXE_MAC"
             fi
+        fi
+
+        # 3순위: Hub 디렉토리 글로빙 폴백 — 버전 불일치 시 설치된 임의 버전 사용
+        if [ -z "$UNITY_EXE" ] || [ ! -f "$UNITY_EXE" ]; then
+            UNITY_EXE=""
+            for HUB_DIR in \
+                "/c/Program Files/Unity/Hub/Editor" \
+                "/d/Program Files/Unity/Hub/Editor" \
+                "/Applications/Unity/Hub/Editor"
+            do
+                [ -d "$HUB_DIR" ] || continue
+                for VER_DIR in "$HUB_DIR"/*/; do
+                    [ -d "$VER_DIR" ] || continue
+                    if [ -f "${VER_DIR}Editor/Unity.exe" ]; then
+                        UNITY_EXE="${VER_DIR}Editor/Unity.exe"
+                        printf "  ${YELLOW}버전 불일치 폴백: %s${NC}\n" "$UNITY_EXE"
+                        break 2
+                    elif [ -f "${VER_DIR}Unity.app/Contents/MacOS/Unity" ]; then
+                        UNITY_EXE="${VER_DIR}Unity.app/Contents/MacOS/Unity"
+                        printf "  ${YELLOW}버전 불일치 폴백: %s${NC}\n" "$UNITY_EXE"
+                        break 2
+                    fi
+                done
+            done
         fi
     fi
 
