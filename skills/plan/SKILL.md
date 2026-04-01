@@ -7,7 +7,7 @@ description: >
   Usage: /plan [feature description]
   Example: /plan 인벤토리 시스템
   Example: /plan 보스 전투 패턴
-tools: Read, Glob, Grep, Write
+tools: Read, Glob, Grep, Write, EnterPlanMode, ExitPlanMode
 model: opus
 triggers:
   - "설계해줘"
@@ -21,6 +21,10 @@ keywords: [plan, architecture, design, feature, system]
 요청: $ARGUMENTS
 
 ## 실행 순서
+
+### 0단계: Plan Mode 진입
+
+`EnterPlanMode` 호출 — 승인 전까지 파일 수정 차단.
 
 ### 1단계: 병렬 현황 파악
 
@@ -62,6 +66,8 @@ architect-planner 의 설계 플랜을 그대로 출력한다.
 "이 설계로 진행할까요?" 확인 요청 후 대기.
 
 승인 시:
+`ExitPlanMode` 호출 — 파일 저장 허용.
+
 1. architect-planner 가 docs/architecture/기능명-설계.md 자동 저장
 2. .claude/feature_list.json 에 해당 기능 항목 추가 (`passes: false` 로 시작)
 3. "코드 구현을 시작할까요?" 확인

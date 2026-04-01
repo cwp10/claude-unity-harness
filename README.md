@@ -81,7 +81,7 @@ claude-unity-harness/
 │   ├── architect-planner    설계 플랜 · 리팩토링 플랜 작성
 │   ├── unity-reviewer       Unity C# 코드 리뷰
 │   ├── doc-writer           문서 작성
-│   ├── debugger             버그 진단
+│   ├── debugger             버그 진단 (using 누락 자동 검증 포함)
 │   ├── critic               대안 제시 · 성능 최적화 관점
 │   └── verifier             최종 스펙 검증 · passes:true 판정
 │
@@ -179,17 +179,19 @@ claude-unity-harness/
    - 클래스·컴포넌트 다이어그램
    - 구현 로드맵
    - 대안 2가지 + 트레이드오프
-3. 플랜 승인 대기 — **승인 전에는 코드를 작성하지 않습니다.**
-4. 승인 시: `docs/architecture/기능명-설계.md` 저장 + `.claude/feature_list.json`에 `passes: false`로 항목 추가.
+3. 플랜 승인 대기 — **Plan Mode가 강제 활성화되어 승인 전에는 파일을 수정할 수 없습니다.**
+4. 승인 시: Plan Mode 해제 → `docs/architecture/기능명-설계.md` 저장 + `.claude/feature_list.json`에 `passes: false`로 항목 추가.
 5. 단계별 코드 구현 시작.
 
 ```mermaid
 flowchart LR
-    A[/plan 인벤토리 시스템] --> B[codebase-explorer\n기존 코드 탐색]
+    A[/plan 인벤토리 시스템] --> PM[EnterPlanMode]
+    PM --> B[codebase-explorer\n기존 코드 탐색]
     B --> C[architect-planner\n설계 플랜 + 대안 2가지]
     C --> D{승인?}
     D -- 거절 --> C
-    D -- 승인 --> E[docs/architecture/ 저장\nfeature_list.json 항목 추가]
+    D -- 승인 --> XM[ExitPlanMode]
+    XM --> E[docs/architecture/ 저장\nfeature_list.json 항목 추가]
     E --> F[단계별 코드 구현]
 ```
 
@@ -223,14 +225,15 @@ flowchart LR
 
 | 규모 | 기준 | 처리 |
 |------|------|------|
-| Small | 메서드 추출·네이밍·중복 제거 (1~2개 파일) | 즉시 수정 |
-| Medium | 클래스 분리·패턴 교체 (3~5개 파일) | 플랜 제시 → 승인 → 단계별 수정 |
+| Small | 메서드 추출·네이밍·중복 제거 (1~2개 파일) | Plan Mode 해제 후 즉시 수정 |
+| Medium | 클래스 분리·패턴 교체 (3~5개 파일) | 플랜 제시 → 승인 → Plan Mode 해제 → 단계별 수정 |
 | Large | 아키텍처 변경·크로스 시스템 (6개+ 파일) | `architect-planner` 에이전트 위임 |
 
-1. `codebase-explorer`가 역참조(이 코드를 참조하는 파일)와 기존 리팩토링 이력(`docs/refactor/`)을 파악합니다.
-2. 규모를 판단해 처리 방식 결정.
-3. 완료 후 `docs/refactor/이력.md`에 날짜·변경 내용·개선 효과를 저장합니다.
-4. `verifier` 에이전트로 컴파일 오류 없음을 검증합니다.
+1. 시작 시 **Plan Mode 강제 활성화** — 규모 확정 전까지 파일 수정 차단.
+2. `codebase-explorer`가 역참조(이 코드를 참조하는 파일)와 기존 리팩토링 이력(`docs/refactor/`)을 파악합니다.
+3. 규모를 판단해 처리 방식 결정 → Plan Mode 해제.
+4. 완료 후 `docs/refactor/이력.md`에 날짜·변경 내용·개선 효과를 저장합니다.
+5. `verifier` 에이전트로 컴파일 오류 없음을 검증합니다.
 
 ---
 

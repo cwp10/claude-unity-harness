@@ -8,7 +8,7 @@ description: >
   Detects scale (Small/Medium/Large) and either fixes directly or presents a plan first.
   Saves refactoring history to docs/refactor/ on completion.
   Do NOT use for new feature development — use /plan instead.
-tools: Read, Glob, Grep, Write, Bash
+tools: Read, Glob, Grep, Write, Bash, EnterPlanMode, ExitPlanMode
 model: opus
 triggers:
   - "리팩토링"
@@ -22,6 +22,11 @@ keywords: [refactor, cleanup, architecture, solid, pattern]
 대상: $ARGUMENTS
 
 ## 실행 순서
+
+### 0단계: 규모 예비 판단 후 Plan Mode 진입
+
+규모 판단은 1단계 탐색 후 확정되므로, 일단 `EnterPlanMode` 호출로 시작한다.
+Small 규모로 확정되면 2단계에서 즉시 `ExitPlanMode` 후 수정 진행.
 
 ### 1단계: codebase-explorer + architect-planner 파이프라인
 
@@ -44,7 +49,7 @@ codebase-explorer 에이전트에게 위임:
 ### 3단계: 규모별 처리
 
 **Small — 즉시 수정:**
-수정 내용 설명 후 파일 직접 수정.
+`ExitPlanMode` 호출 후 수정 내용 설명 후 파일 직접 수정.
 수정 완료 후 docs/refactor/이력.md 업데이트.
 
 **Medium/Large — architect-planner 에이전트 위임:**
@@ -52,6 +57,7 @@ codebase-explorer 에이전트에게 위임:
 architect-planner 가 리팩토링 플랜 형식으로 출력 후 승인 대기.
 
 승인 후:
+`ExitPlanMode` 호출 — 파일 수정 허용.
 - 메인 Claude가 플랜대로 단계별 수정 실행
 - 각 단계 완료 후 사용자 확인
 

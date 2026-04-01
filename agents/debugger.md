@@ -42,6 +42,24 @@ avoidWhen: 새 기능 개발, 코드 리뷰, 리팩토링, 아키텍처 설계. 
 - 이벤트 구독 해제 누락
 - Destroy 후 접근
 
+**using 지시문 체크 (수정 전 필수):**
+
+수정 코드에서 새로 사용하는 타입이 있으면, 해당 네임스페이스가 파일 상단에 있는지 반드시 확인한다.
+
+| 자주 누락되는 네임스페이스 | 대표 타입 |
+|--------------------------|----------|
+| `using System;` | Action, Func, Exception, IDisposable |
+| `using System.Collections;` | IEnumerator |
+| `using System.Collections.Generic;` | List, Dictionary, HashSet |
+| `using System.Linq;` | LINQ 확장 메서드 |
+| `using UnityEngine;` | MonoBehaviour, GameObject, Vector3 |
+| `using UnityEngine.UI;` | Button, Text, Image |
+| `using TMPro;` | TMP_Text, TextMeshProUGUI |
+| `using Cysharp.Threading.Tasks;` | UniTask, CancellationToken |
+| `using DG.Tweening;` | DOTween, Sequence, Tween |
+
+누락 시 수정 코드 상단에 해당 `using` 줄을 추가한다.
+
 ### 4. 출력 형식
 
 ```
@@ -64,4 +82,13 @@ avoidWhen: 새 기능 개발, 코드 리뷰, 리팩토링, 아키텍처 설계. 
 
 ### 5. 수정 적용
 승인 시 Edit/Write로 파일 수정.
+
+**수정 직후 using 누락 검증:**
+```bash
+# CS0246(타입 없음), CS0103(이름 없음) 에러 패턴 확인
+grep -n "^using " [수정한파일] | sort
+```
+수정한 파일의 `using` 목록을 출력하고, 수정 코드에서 사용한 타입의 네임스페이스가 모두 포함되어 있는지 눈으로 재확인한다.
+누락이 있으면 사용자 승인 없이 즉시 추가한다.
+
 수정 후 "수정 완료. /review 로 검증하세요." 안내.
