@@ -43,6 +43,7 @@ Unity 프로젝트를 위한 Claude Code 플러그인.
 | `/unity-test [EditMode\|PlayMode\|All]` | 테스트 실행 + 실패 원인 분석 (UnityMCP 필요) · [↓](#16-unity-test-editmodeplaymodeall--테스트-실행-unitymcp-필요) |
 | `/unity-scene-audit` | 씬 품질 감사 — Missing·네이밍·성능 점검 (UnityMCP 필요) · [↓](#17-unity-scene-audit--씬-감사-unitymcp-필요) |
 | `/perf [파일]` | 성능 패턴 탐지 — GC Alloc·캐싱 누락·Draw Call · [↓](#18-perf-파일--성능-분석) |
+| `/autopilot [on\|off]` | 권한 자동 승인 토글 — git push는 항상 차단 · [↓](#19-autopilot-onoff--오토파일럿) |
 
 ---
 
@@ -51,12 +52,13 @@ Unity 프로젝트를 위한 Claude Code 플러그인.
 ```
 claude-unity-harness/
 │
-├── skills/                  슬래시 커맨드 구현체 (18개 + 자동 로드 스킬 1개)
+├── skills/                  슬래시 커맨드 구현체 (19개 + 자동 로드 스킬 1개)
 │   ├── plan/                설계 플랜 생성
 │   ├── review/              코드 리뷰
 │   ├── refactor/            리팩토링 플랜 + 실행
 │   ├── audit/               전체 감사 (migrate · localize 서브커맨드 포함)
 │   ├── perf/                성능 패턴 탐지
+│   ├── autopilot/           권한 자동 승인 토글
 │   ├── fix/                 버그 진단
 │   ├── analyze/             코드 분석
 │   ├── doc/                 문서 생성 (readme · handover · delivery)
@@ -500,6 +502,25 @@ Update 루프·GC Alloc·Draw Call 위험 패턴을 탐지합니다.
 Critical 항목마다 수정 코드 예시를 함께 제시합니다.
 
 > 전체 프로젝트 성능 점검은 `/audit`을, 특정 파일·시스템 심층 분석은 `/perf`를 사용하세요.
+
+---
+
+### 19. `/autopilot [on|off]` — 오토파일럿
+
+`.claude/settings.json`의 권한 설정을 토글합니다. 인수 없이 실행하면 현재 상태를 확인합니다.
+
+| 커맨드 | 동작 |
+|--------|------|
+| `/autopilot` | 현재 ON/OFF 상태 + allow·deny 목록 출력 |
+| `/autopilot on` | `Bash(*)`·`Edit(*)`·`Write(*)` 자동 승인 추가 |
+| `/autopilot off` | 추가된 자동 승인 항목 제거, 기본 승인 방식 복원 |
+
+**ON 시 권한 구성:**
+- 자동 승인: `Bash(*)`·`Edit(*)`·`Write(*)`
+- 항상 차단: `Bash(git push*)` — 푸시는 오토파일럿 상태와 무관하게 항상 확인
+
+> 기존 allow·deny 항목은 건드리지 않습니다. 오토파일럿이 추가한 항목만 넣고 뺍니다.
+> 변경 후 세션을 재시작해야 적용됩니다.
 
 ---
 
