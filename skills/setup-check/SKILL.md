@@ -2,6 +2,7 @@
 name: setup-check
 description: >
   플러그인 설치 상태와 프로젝트 초기화 상태를 진단한다.
+  /setup 으로 초기화하고 문제가 생겼을 때 실행한다. 초기화는 /setup, 재초기화는 /setup --force.
   Usage: /setup-check
   pre-commit hook, CLAUDE.md 설정, 하네스 파일, Unity 폴더 구조를 점검한다.
   문제 항목은 수정 방법과 함께 출력한다.

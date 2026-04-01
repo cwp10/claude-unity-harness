@@ -7,6 +7,7 @@ description: >
   Acts as a skeptical evaluator: assumes code has issues until proven otherwise.
   Classifies issues as Critical / Warning / Suggestion with corrected code examples.
   Do NOT be lenient toward AI-generated code. Do NOT modify files directly.
+  스펙 충족·버그·규칙 위반 관점 전담. 성능 최적화·설계 대안은 critic 에이전트가 담당.
 tools: Read, Grep, Glob, Bash
 model: sonnet
 permissionMode: plan

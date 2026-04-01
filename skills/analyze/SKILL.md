@@ -1,9 +1,10 @@
 ---
 name: analyze
 description: >
-  코드·기능·시스템을 분석해서 요약 출력한다.
+  코드·기능·시스템을 분석해서 사람이 읽기 좋은 형태로 요약 출력한다.
   출력 후 docs/analysis/ 저장 여부를 물어본다.
   저장 시 같은 카테고리의 기존 문서가 있으면 병합 업데이트한다.
+  사용자 대상 분석 스킬. 내부 탐색 전용은 codebase-explorer 에이전트가 담당.
   Usage: /analyze [분석 대상]
   Example: /analyze 인벤토리 시스템
   Example: /analyze Assets/_Project/Scripts/Game/Combat/

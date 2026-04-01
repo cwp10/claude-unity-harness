@@ -4,6 +4,7 @@ description: >
   Unity 프로젝트를 감지하고 .claude/CLAUDE.md에 스택 정보를 추가한다.
   하네스 파일(.claude/claude-progress.txt, .claude/feature_list.json)을 생성하고 pre-commit hook을 설치한다.
   프로젝트 루트에서 최초 1회 실행. 재실행은 /setup --force.
+  설치 후 문제가 생기면 /setup-check 로 진단한다.
 tools: Read, Glob, Bash, Write
 model: sonnet
 triggers:

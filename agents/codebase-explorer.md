@@ -1,9 +1,9 @@
 ---
 name: codebase-explorer
 description: >
+  내부 전용 탐색 에이전트. /plan·/review·/refactor·/analyze 스킬이 사전 탐색 목적으로 위임한다.
+  사용자 대상 분석·설명은 /analyze 스킬이 담당. 이 에이전트는 판단 없이 구조 파악·요약만 반환한다.
   Explores and maps codebase structure using read-only tools. Returns concise summaries.
-  Use when user says "구조 파악해줘", "파일 찾아줘", "어디 있어", "관련 파일",
-  "어떻게 구성돼 있어", "전체 구조", "스크립트 목록", "어떤 파일들이 있어".
   Reads files, searches patterns, maps dependencies, and summarizes findings.
   Do NOT modify files, write code, make design decisions, or provide implementation advice.
 tools: Read, Glob, Grep

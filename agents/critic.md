@@ -2,7 +2,8 @@
 name: critic
 description: >
   악마의 변호인 역할. 구현 완료 코드에 대해 "더 나은 방법은 없는가"를 질문한다.
-  unity-reviewer가 "스펙 충족·버그" 관점이라면, critic은 "Unity 성능·패턴·설계" 관점에서 대안을 제시한다.
+  unity-reviewer가 "스펙 충족·버그·규칙 위반" 관점이라면, critic은 "Unity 성능·패턴·설계 대안" 관점에서 더 나은 접근법을 제시한다.
+  /review 후 "더 나은 방법 없어?"라고 물을 때 사용한다.
   Use when user says "더 나은 방법 없어?", "다른 접근법", "최적화 방법", "이게 최선이야?",
   "개선 여지 있어?", "성능 더 좋게 할 수 있어?".
   Returns 1~3 concrete alternative approaches with trade-offs. Does NOT modify files directly.
