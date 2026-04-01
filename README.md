@@ -115,11 +115,11 @@ claude-unity-harness/
 
 | 이벤트 | 동작 |
 |--------|------|
-| **SessionStart** | `project-memory.json` → `.claude/claude-progress.txt` → `.claude/feature_list.json` 순으로 컨텍스트를 자동 주입 + `.context_loaded` 생성 |
+| **SessionStart** | `project-memory.json` · `claude-progress.txt` · `feature_list.json` **세 파일 모두** 동시에 컨텍스트 주입 + `.context_loaded` 생성 |
 | **UserPromptSubmit** | 첫 번째 메시지 전에 컨텍스트가 없으면 동일하게 자동 주입 (SessionStart 누락 보정) |
-| **Stop** | 매 응답 완료 후 git 변경 파일 목록을 `project-memory.json`에 증분 저장 (토큰 비용 없음) |
-| **PreCompact** | 컨텍스트 압축 직전 LLM이 대화 내용을 요약해 `project-memory.json` 전체 갱신 |
-| **SessionEnd** | `.context_loaded` 플래그 삭제 — 다음 세션에서 컨텍스트가 다시 로드될 수 있도록 초기화 |
+| **Stop** | 매 응답 완료 후 `project-memory.json`의 `savedAt` 타임스탬프 갱신 (bash만 실행 — 비용 $0) |
+| **PreCompact** | 컨텍스트 압축 직전 LLM(haiku)이 대화 내용을 분석해 `project-memory.json` + `claude-progress.txt` 동시 갱신 |
+| **SessionEnd** | `claude-progress.txt`에 날짜 플레이스홀더 행 즉시 기록 (100% 신뢰) → `.context_loaded` 플래그 삭제 |
 | **PreToolUse (Write/Edit)** | `.cs` 파일 수정 직전마다 Unity C# 핵심 규칙(m\_ 접두사, Allman 중괄호 등) 자동 주입 |
 | **PostToolUse (Write/Edit)** | `.cs` 파일 저장 직후 `.meta` 누락 경고 자동 출력 |
 
@@ -319,15 +319,16 @@ git commit --no-verify -m "[hotfix] 긴급 수정"
   → 전체 코드베이스 감사 + 빌드 체크
 
 세션 중 자동 저장 (hooks)
-  → Stop hook: 매 응답 완료 후 git 변경 파일 목록 자동 증분 저장 (토큰 0)
-  → PreCompact hook: 컨텍스트 압축 직전 LLM 요약 저장
+  → Stop hook: 매 응답 완료 후 savedAt 타임스탬프 갱신 (비용 $0)
+  → PreCompact hook: 컨텍스트 압축 직전 project-memory.json + claude-progress.txt 동시 갱신
 
 세션 종료
-  /context-save (선택)
-  → .claude/claude-progress.txt + project-memory.json 수동 요약 저장
-  → git commit (세션 내용 자동 커밋)
   대화 닫기
-  → SessionEnd hook: 다음 세션 컨텍스트 로드 플래그 초기화
+  → SessionEnd hook: claude-progress.txt에 날짜 플레이스홀더 즉시 기록 (자동)
+  → 다음 PreCompact 시 플레이스홀더를 실제 작업 내용으로 자동 보완
+  /context-save (선택 — 즉시 상세 저장 + git commit 필요 시)
+  → .claude/claude-progress.txt + project-memory.json 즉시 상세 저장
+  → git commit (세션 내용 자동 커밋)
 
 git commit 시 자동 실행
   [0] .meta 파일 확인
@@ -352,4 +353,4 @@ git commit 시 자동 실행
 
 - Claude Code CLI
 - Unity 6 LTS
-- Git for Windows (Git Bash)
+- Git (Windows: Git Bash / macOS: 기본 터미널)
