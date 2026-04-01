@@ -47,8 +47,17 @@ elif [ -f "$APPDATA/npm/claude.cmd" ]; then
     CLAUDE_CMD="$APPDATA/npm/claude.cmd"
 fi
 
+# ── 초기 커밋 여부 확인 (빈 저장소 대응) ─────────────────────
+IS_INITIAL_COMMIT=false
+git rev-parse --verify HEAD > /dev/null 2>&1 || IS_INITIAL_COMMIT=true
+
 # ── 변경된 .cs 파일 확인 ────────────────────────────────────
-CHANGED_CS=$(git diff --cached --name-only --diff-filter=ACM | grep '\.cs$' || true)
+if [ "$IS_INITIAL_COMMIT" = true ]; then
+    # 첫 커밋: HEAD 없음 → 스테이징된 전체 파일 사용
+    CHANGED_CS=$(git ls-files --cached 2>/dev/null | grep '\.cs$' || true)
+else
+    CHANGED_CS=$(git diff --cached --name-only --diff-filter=ACM 2>/dev/null | grep '\.cs$' || true)
+fi
 
 if [ -z "$CHANGED_CS" ]; then
     printf "${GREEN}리뷰 대상 파일 없음 (.cs 파일 변경 없음).${NC}\n\n"
@@ -63,8 +72,13 @@ printf "${CYAN}━━━━━━━━━━━━━━━━━━━━━�
 printf "${CYAN}  [0/3] .meta 파일 확인${NC}\n"
 printf "${CYAN}━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━${NC}\n\n"
 
-STAGED_ASSETS=$(git diff --cached --name-only --diff-filter=ACM \
-    | grep -E '\.(cs|prefab|asset|unity|mat|anim|controller|png|jpg|fbx)$' || true)
+if [ "$IS_INITIAL_COMMIT" = true ]; then
+    STAGED_ASSETS=$(git ls-files --cached 2>/dev/null \
+        | grep -E '\.(cs|prefab|asset|unity|mat|anim|controller|png|jpg|fbx)$' || true)
+else
+    STAGED_ASSETS=$(git diff --cached --name-only --diff-filter=ACM 2>/dev/null \
+        | grep -E '\.(cs|prefab|asset|unity|mat|anim|controller|png|jpg|fbx)$' || true)
+fi
 
 MISSING_META=""
 AUTO_ADDED=""
@@ -73,7 +87,13 @@ if [ -n "$STAGED_ASSETS" ]; then
     while IFS= read -r asset; do
         META="${asset}.meta"
         if [ -f "$META" ]; then
-            if ! git diff --cached --name-only | grep -qF "$META"; then
+            ALREADY_STAGED=""
+            if [ "$IS_INITIAL_COMMIT" = true ]; then
+                git ls-files --cached 2>/dev/null | grep -qF "$META" && ALREADY_STAGED=true
+            else
+                git diff --cached --name-only 2>/dev/null | grep -qF "$META" && ALREADY_STAGED=true
+            fi
+            if [ -z "$ALREADY_STAGED" ]; then
                 git add "$META"
                 AUTO_ADDED="${AUTO_ADDED}  + ${META}\n"
             fi
@@ -181,21 +201,30 @@ if [ "$COMPILE_CHECKED" = false ]; then
         fi
     fi
 
+    # ── 컴파일 타임아웃 읽기 (CLAUDE.md UNITY_COMPILE_TIMEOUT: N, 기본 120초) ──
+    COMPILE_TIMEOUT=120
+    if [ -f ".claude/CLAUDE.md" ]; then
+        CUSTOM_TIMEOUT=$(grep "UNITY_COMPILE_TIMEOUT:" ".claude/CLAUDE.md" \
+            | sed 's/.*UNITY_COMPILE_TIMEOUT: *//' | tr -d '\r' | grep '^[0-9][0-9]*$' | head -1)
+        [ -n "$CUSTOM_TIMEOUT" ] && COMPILE_TIMEOUT="$CUSTOM_TIMEOUT"
+    fi
+
     if [ -z "$UNITY_VERSION" ]; then
         printf "  ${YELLOW}ProjectSettings/ProjectVersion.txt 없음. 컴파일 검증 생략.${NC}\n\n"
     elif [ -z "$UNITY_EXE" ] || [ ! -f "$UNITY_EXE" ]; then
         printf "  ${YELLOW}Unity.exe 경로를 찾을 수 없습니다. 컴파일 검증 생략.${NC}\n"
         printf "  커스텀 경로 설정: .claude/CLAUDE.md 에 아래 줄 추가\n"
-        printf "    UNITY_PATH: C:/Program Files/Unity/Hub/Editor/%s/Editor/Unity.exe\n\n" "$UNITY_VERSION"
+        printf "    UNITY_PATH: C:/Program Files/Unity/Hub/Editor/%s/Editor/Unity.exe\n"  "$UNITY_VERSION"
+        printf "  타임아웃 설정 (기본 120초): UNITY_COMPILE_TIMEOUT: 180\n\n"
     else
         printf "  Unity.exe: %s\n" "$UNITY_EXE"
-        printf "  컴파일 검증 중... batchmode (최대 60초)\n\n"
+        printf "  컴파일 검증 중... batchmode (최대 %d초)\n\n" "$COMPILE_TIMEOUT"
 
         COMPILE_LOG=".claude/compile_$(date -u +%Y%m%d_%H%M%S).log"
         mkdir -p ".claude"
 
         COMPILE_EXIT=0
-        timeout 60 "$UNITY_EXE" \
+        timeout "$COMPILE_TIMEOUT" "$UNITY_EXE" \
             -batchmode \
             -quit \
             -projectPath "$(pwd)" \
@@ -211,7 +240,7 @@ if [ "$COMPILE_CHECKED" = false ]; then
         if [ -n "$COMPILE_ERRORS" ] || [ "$COMPILE_EXIT" -eq 124 ]; then
             printf "${RED}━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━${NC}\n"
             if [ "$COMPILE_EXIT" -eq 124 ]; then
-                printf "${RED}  커밋 차단: 컴파일 타임아웃 (60초 초과)${NC}\n"
+                printf "${RED}  커밋 차단: 컴파일 타임아웃 (%d초 초과)${NC}\n" "$COMPILE_TIMEOUT"
             else
                 printf "${RED}  커밋 차단: 컴파일 에러 발생 (batchmode)${NC}\n"
             fi
