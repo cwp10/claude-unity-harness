@@ -25,23 +25,23 @@ Unity 프로젝트를 위한 Claude Code 플러그인.
 
 | 커맨드 | 설명 |
 |--------|------|
-| `/setup` | 프로젝트 초기화 — CLAUDE.md 스택 설정, 하네스 파일 생성, hook 설치 |
-| `/context-load` | 세션 시작 — 이전 진행 상황 복구 |
-| `/context-save` | 세션 종료 — 진행 상황 저장 + git 커밋 |
-| `/deep-interview [기능명]` | 요구사항 심층 인터뷰 → /plan 자동 연결 |
-| `/plan [기능명]` | 설계 플랜 생성 (Plan Mode 강제) |
-| `/review [파일]` | 코드 리뷰 |
-| `/audit` | 전체 감사 + 빌드 체크 |
-| `/refactor [대상]` | 리팩토링 플랜 + 실행 (Plan Mode 강제) |
-| `/fix [오류]` | 버그 진단 + 수정 |
-| `/analyze [대상]` | 코드·시스템 분석 |
-| `/git-summary` | 커밋 메시지 제안 |
-| `/doc readme\|handover\|delivery` | 문서 생성 |
-| `/setup-check` | 설치 상태 점검 |
-| `/unity-setup-mcp` | Unity MCP 서버 연동 설정 |
-| `/unity-console` | Unity 콘솔 에러·경고 분석 (UnityMCP 필요) |
-| `/unity-test [EditMode\|PlayMode]` | 테스트 실행 + 실패 원인 분석 (UnityMCP 필요) |
-| `/unity-scene-audit` | 씬 품질 감사 — Missing·네이밍·성능 점검 (UnityMCP 필요) |
+| `/setup` | 프로젝트 초기화 — CLAUDE.md 스택 설정, 하네스 파일 생성, hook 설치 · [↓](#1-setup--프로젝트-초기화) |
+| `/context-load` | 세션 시작 — 이전 진행 상황 복구 · [↓](#2-context-load--세션-복구) |
+| `/context-save` | 세션 종료 — 진행 상황 저장 + git 커밋 · [↓](#3-context-save--세션-저장) |
+| `/deep-interview [기능명]` | 요구사항 심층 인터뷰 → /plan 자동 연결 · [↓](#4-deep-interview-기능명--요구사항-명확화) |
+| `/plan [기능명]` | 설계 플랜 생성 (Plan Mode 강제) · [↓](#5-plan-기능명--설계-플랜-생성) |
+| `/review [파일]` | 코드 리뷰 · [↓](#6-review-파일--코드-리뷰) |
+| `/audit` | 전체 감사 + 빌드 체크 · [↓](#7-audit--전체-감사) |
+| `/refactor [대상]` | 리팩토링 플랜 + 실행 (Plan Mode 강제) · [↓](#8-refactor-대상--리팩토링) |
+| `/fix [오류]` | 버그 진단 + 수정 · [↓](#9-fix-오류--버그-수정) |
+| `/analyze [대상]` | 코드·시스템 분석 · [↓](#10-analyze-대상--코드-분석) |
+| `/git-summary` | 커밋 메시지 제안 · [↓](#11-git-summary--커밋-메시지-제안) |
+| `/doc readme\|handover\|delivery` | 문서 생성 · [↓](#12-doc-readmehandoverdelivery--문서-생성) |
+| `/setup-check` | 설치 상태 점검 · [↓](#13-setup-check--설치-상태-점검) |
+| `/unity-setup-mcp` | Unity MCP 서버 연동 설정 · [↓](#14-unity-setup-mcp--unity-mcp-연동) |
+| `/unity-console` | Unity 콘솔 에러·경고 분석 (UnityMCP 필요) · [↓](#15-unity-console--콘솔-분석-unitymcp-필요) |
+| `/unity-test [EditMode\|PlayMode\|All]` | 테스트 실행 + 실패 원인 분석 (UnityMCP 필요) · [↓](#16-unity-test-editmodeplaymodeall--테스트-실행-unitymcp-필요) |
+| `/unity-scene-audit` | 씬 품질 감사 — Missing·네이밍·성능 점검 (UnityMCP 필요) · [↓](#17-unity-scene-audit--씬-감사-unitymcp-필요) |
 
 ---
 
@@ -213,7 +213,7 @@ claude-unity-harness/
 
 ```
 # 새 세션 시작 시 자동 복구
-→ SessionStart hook이 project-memory.json + claude-progress.txt 자동 주입
+→ SessionStart hook이 project-memory.json · claude-progress.txt · feature_list.json 자동 주입
 
 # 요약된 형태로 보고 싶을 때
 /context-load
