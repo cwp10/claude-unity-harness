@@ -28,26 +28,20 @@ Unity 프로젝트를 위한 Claude Code 플러그인.
 | `/setup` | 프로젝트 초기화 — CLAUDE.md 스택 설정, 하네스 파일 생성, hook 설치 |
 | `/context-load` | 세션 시작 — 이전 진행 상황 복구 |
 | `/context-save` | 세션 종료 — 진행 상황 저장 + git 커밋 |
-| `/plan [기능명]` | 설계 플랜 생성 |
+| `/deep-interview [기능명]` | 요구사항 심층 인터뷰 → /plan 자동 연결 |
+| `/plan [기능명]` | 설계 플랜 생성 (Plan Mode 강제) |
 | `/review [파일]` | 코드 리뷰 |
 | `/audit` | 전체 감사 + 빌드 체크 |
-| `/refactor [대상]` | 리팩토링 플랜 + 실행 |
+| `/refactor [대상]` | 리팩토링 플랜 + 실행 (Plan Mode 강제) |
 | `/fix [오류]` | 버그 진단 + 수정 |
 | `/analyze [대상]` | 코드·시스템 분석 |
 | `/git-summary` | 커밋 메시지 제안 |
 | `/doc readme\|handover\|delivery` | 문서 생성 |
-| `/deep-interview` | 요구사항 심층 인터뷰 |
 | `/setup-check` | 설치 상태 점검 |
-| `/unity-setup-mcp` | Unity MCP 서버(CoplayDev/unity-mcp) 연동 설정 |
-| `/unity-console` | Unity 콘솔 에러·경고 분석 + 수정 제안 (UnityMCP 필요) |
+| `/unity-setup-mcp` | Unity MCP 서버 연동 설정 |
+| `/unity-console` | Unity 콘솔 에러·경고 분석 (UnityMCP 필요) |
 | `/unity-test [EditMode\|PlayMode]` | 테스트 실행 + 실패 원인 분석 (UnityMCP 필요) |
-| `/unity-scene-audit` | 현재 씬 품질 감사 — Missing·네이밍·성능 점검 (UnityMCP 필요) |
-
-### 자동 로드 스킬
-
-| 스킬 | 로드 조건 |
-|------|----------|
-| `unity-patterns` | Unity C# 코드 작성·설계·리팩토링 시 자동 로드 |
+| `/unity-scene-audit` | 씬 품질 감사 — Missing·네이밍·성능 점검 (UnityMCP 필요) |
 
 ---
 
@@ -86,7 +80,7 @@ claude-unity-harness/
 │   └── verifier             최종 스펙 검증 · passes:true 판정
 │
 ├── hooks/
-│   └── pre-commit           git commit 시 자동 실행 (아래 상세 설명)
+│   └── pre-commit           git commit 시 자동 실행
 │
 ├── rules/
 │   ├── response.md          소통 언어 · 응답 원칙 · 금지 사항
@@ -105,50 +99,212 @@ claude-unity-harness/
 
 ---
 
-## 운영 방식 상세
+## 케이스별 사용 가이드
 
-### 1. 세션 관리 — 자동 + `/context-load` / `/context-save`
-
-**세션 시작·종료는 hooks.json에 의해 자동으로 처리됩니다.** `/context-load`와 `/context-save`는 그 위에서 동작하는 보조 커맨드입니다.
-
-#### 자동 동작 (hooks.json)
-
-| 이벤트 | 동작 |
-|--------|------|
-| **SessionStart** | `project-memory.json` · `claude-progress.txt` · `feature_list.json` **세 파일 모두** 동시에 컨텍스트 주입 + `.context_loaded` 생성 |
-| **UserPromptSubmit** | 첫 번째 메시지 전에 컨텍스트가 없으면 동일하게 자동 주입 (SessionStart 누락 보정) |
-| **Stop** | 매 응답 완료 후 `project-memory.json`의 `savedAt` 타임스탬프 갱신 (bash만 실행 — 비용 $0) |
-| **PreCompact** | 컨텍스트 압축 직전 LLM(haiku)이 대화 내용을 분석해 `project-memory.json` + `claude-progress.txt` 동시 갱신 |
-| **SessionEnd** | `claude-progress.txt`에 날짜 플레이스홀더 행 즉시 기록 (100% 신뢰) → `.context_loaded` 플래그 삭제 |
-| **PreToolUse (Write/Edit)** | `.cs` 파일 수정 직전마다 Unity C# 핵심 규칙(m\_ 접두사, Allman 중괄호 등) 자동 주입 |
-| **PostToolUse (Write/Edit)** | `.cs` 파일 저장 직후 `.meta` 누락 경고 자동 출력 |
-
-#### `/context-load` — 수동 복구 요약
-
-자동 주입된 컨텍스트를 **사람이 읽기 좋은 형태로 정리**하고 다음 작업을 제안합니다.
-
-1. `project-memory.json` + `.claude/claude-progress.txt` 내용 정리 출력
-2. `.claude/feature_list.json`에서 `passes: false` 항목 확인 — 다음 할 작업 파악
-3. `git log --oneline -10`으로 최근 커밋 이력 확인
-4. "1번 작업부터 시작할까요?" 질문
+### Case 1. 새 Unity 프로젝트를 시작할 때
 
 ```
+# 1. 플러그인 설치 (최초 1회)
+/plugin marketplace add https://github.com/cwp10/claude-unity-harness
+/plugin install claude-unity-harness@cwp10-plugins
+
+# 2. Unity 프로젝트 루트에서 초기화
+/setup
+→ CLAUDE.md에 Unity 버전·스택 자동 기록
+→ feature_list.json, claude-progress.txt 생성
+→ pre-commit hook 설치
+
+# 3. 만들 기능 목록 정리
+/deep-interview 인벤토리 시스템
+→ 슬롯 수, 저장 방식, UI 연동 등 3~5개 질문으로 요구사항 확정
+→ /plan 자동 연결
+
+# 4. 설계 플랜 확인 후 구현 시작
+/plan 인벤토리 시스템
+→ Plan Mode 활성화 — 설계 승인 전 파일 수정 차단
+→ 클래스 다이어그램 + 대안 2가지 제시
+→ 승인 시 코드 구현 시작
+```
+
+---
+
+### Case 2. 기존 Unity 프로젝트에 플러그인을 붙일 때
+
+```
+# 1. 기존 프로젝트 루트에서 초기화
+/setup
+→ 기존 코드 건드리지 않음, .claude/ 폴더만 생성
+
+# 2. 현재 코드베이스 파악
+/analyze Assets/_Project/Scripts/
+→ 시스템 구조·의존 관계·패턴 파악
+→ docs/analysis/ 에 저장
+
+# 3. 기술 부채 점검
+/audit
+→ 전체 .cs 파일 Critical 이슈 스캔
+→ .meta 누락, 컴파일 에러 체크
+
+# 4. 이후 일반 개발 흐름으로 진행
+```
+
+---
+
+### Case 3. 새 기능을 개발할 때
+
+```
+# 요구사항이 명확한 경우
+/plan 보스 전투 패턴
+→ 바로 설계 플랜 생성
+
+# 요구사항이 모호한 경우
+/deep-interview 보스 전투 패턴
+→ "페이즈 몇 단계? 패턴 종류? HP 연동?" 질문
+→ 답변 후 /plan 자동 실행
+
+# 구현 완료 후
+/review Assets/_Project/Scripts/Combat/BossController.cs
+→ Critical 0건 확인
+
+/context-save
+→ 진행 상황 저장 + git commit
+```
+
+---
+
+### Case 4. 버그를 수정할 때
+
+```
+# Unity 콘솔에서 에러 복사 후
+/fix NullReferenceException: Object reference not set
+      at PlayerController.Update () (at Assets/.../PlayerController.cs:42)
+→ debugger 에이전트가 원인 분석 + 수정 코드 제시
+→ using 누락 자동 검증 포함
+→ 승인 시 파일 직접 수정
+
+# Unity MCP 연결 시 콘솔 직접 읽기
+/unity-console
+→ 에러·경고 자동 수집 + 원인 분석
+```
+
+---
+
+### Case 5. 코드 품질을 개선할 때
+
+```
+# 특정 파일 리뷰
+/review Assets/_Project/Scripts/Game/GameManager.cs
+→ 성능·Unity 규칙·아키텍처·안전성 4가지 관점 리뷰
+→ Critical / Warning / Suggestion 분류
+
+# 대안 설계가 궁금할 때
+"더 나은 방법 없어?"
+→ critic 에이전트 — 성능 최적화·패턴 대안 제시
+
+# 파일 수가 많아 구조 개선이 필요할 때
+/refactor Assets/_Project/Scripts/Combat/
+→ Plan Mode 활성화 → 규모 판단 (Small/Medium/Large)
+→ Small: 즉시 수정 / Medium·Large: 플랜 승인 후 수정
+```
+
+---
+
+### Case 6. 작업 도중 세션이 끊겼을 때
+
+```
+# 새 세션 시작 시 자동 복구
+→ SessionStart hook이 project-memory.json + claude-progress.txt 자동 주입
+
+# 요약된 형태로 보고 싶을 때
 /context-load
-→ 마지막 작업: PlayerController 리팩토링 완료
-→ 현재 진행: 인벤토리 시스템 구현 중 (2/5 기능 완료)
-→ 다음 작업: 아이템 드롭 시스템
-→ 알려진 이슈: 씬 전환 시 아이템 데이터 초기화 문제
+→ 마지막 작업, 다음 작업, 알려진 이슈 정리 출력
+→ "1번 작업부터 시작할까요?" 제안
 ```
 
-#### `/context-save` — 수동 저장 + 커밋
+---
+
+### Case 7. 외주 개발자에게 코드를 넘길 때
+
+```
+/doc handover CombatSystem
+→ 관련 파일 자동 분석
+→ 역할·API·주의사항·의존성 맵 포함 문서 생성
+→ docs/guide/HANDOVER_CombatSystem_YYYYMMDD.md 저장
+```
+
+---
+
+### Case 8. 클라이언트에 납품할 때
+
+```
+# 납품 문서 생성
+/doc delivery v1.0.0 2025-06-01
+→ feature_list.json에서 구현 기능 자동 추출
+→ 실행 방법·제한사항·유지보수 안내 포함
+→ docs/guide/DELIVERY_프로젝트명_v1.0.0_20250601.md 저장
+
+# 납품 전 최종 점검
+/audit
+→ Critical 0건 확인 후 납품
+```
+
+---
+
+### Case 9. Unity MCP와 함께 사용할 때
+
+```
+# MCP 서버 설치 (최초 1회)
+/unity-setup-mcp
+→ CoplayDev/unity-mcp 패키지 설치 안내
+→ Claude Code 연동까지 단계별 가이드
+
+# 테스트 실행
+/unity-test EditMode
+→ 전체 EditMode 테스트 실행 + 실패 원인 분석
+
+# 씬 구조 점검
+/unity-scene-audit
+→ Missing 컴포넌트, 네이밍 위반, 성능 이슈 감사
+```
+
+---
+
+## 커맨드 상세
+
+### 1. `/setup` — 프로젝트 초기화
+
+Unity 프로젝트 루트에서 최초 1회 실행합니다.
+
+- `ProjectSettings/ProjectVersion.txt`에서 Unity 버전 자동 감지
+- `.claude/CLAUDE.md`에 스택 정보(Unity 버전, 렌더 파이프라인, 패키지) 추가
+- `.claude/feature_list.json` 생성 — 기능 진행 현황 추적
+- `.claude/claude-progress.txt` 생성 — 세션 이력 기록
+- `hooks/pre-commit` hook 설치
+
+---
+
+### 2. `/context-load` — 세션 복구
+
+새 세션 시작 시 이전 작업 상태를 사람이 읽기 좋은 형태로 정리합니다.
+
+- `project-memory.json` + `claude-progress.txt` 내용 요약 출력
+- `feature_list.json`에서 `passes: false` 항목 확인 → 다음 할 작업 파악
+- `git log --oneline -10` 최근 커밋 이력 출력
+- "1번 작업부터 시작할까요?" 다음 작업 제안
+
+> **참고:** SessionStart hook이 세션 시작 시 컨텍스트를 자동 주입합니다. `/context-load`는 그 내용을 사람이 보기 좋게 정리하는 보조 커맨드입니다.
+
+---
+
+### 3. `/context-save` — 세션 저장
 
 작업을 마칠 때 실행합니다. 파일 저장과 git 커밋까지 처리합니다.
 
-1. 현재 대화에서 완료된 작업·미완료 작업·설계 결정·발견된 문제를 추출합니다.
-2. `.claude/claude-progress.txt` 업데이트 — 세션 이력 테이블에 오늘 항목 추가, 다음 작업 갱신.
-3. `.claude/project-memory.json` 업데이트 — 기술 스택·현재 기능·결정 이력(append) 갱신.
-4. `.claude/feature_list.json`에서 `passes: true`로 변경된 항목 확인 + 전체 진행률 반영.
-5. 변경사항이 있으면 자동 `git commit` — 세션 내용에 따라 커밋 타입 자동 선택:
+1. 현재 대화에서 완료·미완료 작업, 설계 결정, 발견된 문제를 추출합니다.
+2. `claude-progress.txt` 업데이트 — 세션 이력 테이블에 오늘 항목 추가.
+3. `project-memory.json` 업데이트 — 기술 스택·현재 기능·결정 이력 갱신.
+4. `feature_list.json`에서 `passes: true` 항목 확인 + 진행률 반영.
+5. `git commit` — 세션 내용에 따라 커밋 타입 자동 선택.
 
 | 세션 내용 | 커밋 타입 |
 |----------|----------|
@@ -158,179 +314,157 @@ claude-unity-harness/
 | 문서·분석 파일만 | `[docs]` |
 | 설정·하네스 파일 | `[chore]` |
 
-```
-/context-save
-→ .claude/claude-progress.txt 업데이트
-→ project-memory.json 업데이트
-→ git commit: "[feat] 인벤토리 시스템 기본 구조 구현"
-→ "다음 세션에서 컨텍스트가 자동 로드됩니다"
-```
+---
+
+### 4. `/deep-interview [기능명]` — 요구사항 명확화
+
+`/plan` 전에 요구사항이 모호할 때 사용합니다.
+
+- 요구사항이 이미 명확하면 → `/plan` 즉시 실행
+- 모호하면 → 범위·상호작용·데이터·UI·예외처리 관점에서 3~5개 질문
+- 답변 수렴 후 요구사항 요약 → `/plan` 자동 실행
 
 ---
 
-### 2. 설계 — `/plan`
+### 5. `/plan [기능명]` — 설계 플랜 생성
 
-새 기능을 만들기 전에 `/plan 기능명`으로 설계 플랜을 먼저 생성합니다.
+새 기능 구현 전에 실행합니다. **Plan Mode가 강제 활성화**되어 승인 전에는 파일을 수정할 수 없습니다.
 
-**내부 동작:**
-1. `codebase-explorer` 에이전트가 기존 코드베이스를 탐색해 유사 패턴·의존 관계를 파악합니다.
-2. `architect-planner` 에이전트가 탐색 결과를 바탕으로 설계 플랜을 작성합니다.
-   - 규모 판단 (Small / Medium / Large)
-   - 클래스·컴포넌트 다이어그램
-   - 구현 로드맵
-   - 대안 2가지 + 트레이드오프
-3. 플랜 승인 대기 — **Plan Mode가 강제 활성화되어 승인 전에는 파일을 수정할 수 없습니다.**
-4. 승인 시: Plan Mode 해제 → `docs/architecture/기능명-설계.md` 저장 + `.claude/feature_list.json`에 `passes: false`로 항목 추가.
-5. 단계별 코드 구현 시작.
-
-```mermaid
-flowchart LR
-    A[/plan 인벤토리 시스템] --> PM[EnterPlanMode]
-    PM --> B[codebase-explorer\n기존 코드 탐색]
-    B --> C[architect-planner\n설계 플랜 + 대안 2가지]
-    C --> D{승인?}
-    D -- 거절 --> C
-    D -- 승인 --> XM[ExitPlanMode]
-    XM --> E[docs/architecture/ 저장\nfeature_list.json 항목 추가]
-    E --> F[단계별 코드 구현]
-```
+- `codebase-explorer`가 기존 코드베이스에서 유사 패턴·의존 관계 탐색
+- `architect-planner`가 규모 판단(Small/Medium/Large), 클래스 다이어그램, 구현 로드맵, 대안 2가지 제시
+- 승인 시: `docs/architecture/기능명-설계.md` 저장 + `feature_list.json`에 `passes: false` 항목 추가
 
 ---
 
-### 3. 코드 리뷰 — `/review`
+### 6. `/review [파일]` — 코드 리뷰
 
-`/review 파일경로` 또는 변경 파일 자동 감지.
+파일 경로를 지정하거나 생략 시 변경 파일 자동 감지합니다.
 
-**내부 동작:**
-1. `codebase-explorer` 에이전트가 대상 파일의 인터페이스·부모 클래스·역참조를 탐색합니다.
-2. `unity-reviewer` 에이전트가 독립 평가자 관점으로 리뷰합니다.
-   - 성능: `Update()` 안의 `GetComponent`·`new`·LINQ
-   - Unity 규칙: public 필드 노출, Resources.Load, 구형 Input, 이벤트 해제 누락
-   - 아키텍처: SRP 위반, 싱글턴 남용, 강한 결합
-   - 안전성: null 참조, 씬 전환 참조 유실, CancellationToken 미전달
-3. 심각도 분류 및 수정 코드 제시:
-   - 🔴 Critical → 즉시 수정 필요
-   - 🟡 Warning → 이번 작업 중 수정
-   - 🟢 Suggestion → 다음 기회에 반영
-4. Critical 0건이면 `verifier` 에이전트로 최종 스펙 검증 후 `passes: true` 처리를 권장합니다.
-5. "더 나은 구현 방법이 궁금하면 `critic` 돌려줘"라고 안내 — `critic` 에이전트는 성능 최적화·대안 패턴을 추가로 제시합니다.
+- `codebase-explorer`가 인터페이스·부모 클래스·역참조 탐색 (병렬)
+- `unity-reviewer`가 독립 평가자 관점으로 리뷰:
+  - 성능: `Update()` 안의 `GetComponent`·`new`·LINQ
+  - Unity 규칙: public 필드 노출, Resources.Load, 구형 Input, 이벤트 해제 누락
+  - 아키텍처: SRP 위반, 싱글턴 남용, 강한 결합
+  - 안전성: null 참조, 씬 전환 참조 유실, CancellationToken 미전달
+
+| 심각도 | 처리 |
+|--------|------|
+| 🔴 Critical | 즉시 수정 필요 |
+| 🟡 Warning | 이번 작업 중 수정 |
+| 🟢 Suggestion | 다음 기회에 반영 |
+
+- Critical 0건 시 `verifier` 에이전트로 최종 스펙 검증 권장
+- "더 나은 방법 없어?" → `critic` 에이전트가 성능 최적화·대안 패턴 추가 제시
 
 ---
 
-### 4. 리팩토링 — `/refactor`
+### 7. `/audit` — 전체 감사
 
-`/refactor 대상파일_또는_폴더` — 새 기능 개발이 아닌 기존 코드 개선에만 사용합니다.
+코드 품질 감사 + 빌드 체크를 병렬로 실행합니다.
 
-**내부 동작 — 규모에 따라 처리 방식이 다릅니다:**
+- `unity-reviewer`가 변경 파일 전체를 성능·Unity 규칙·아키텍처·안전성 4개 관점으로 분석
+- `.meta` 파일 누락 검사
+- C# 컴파일 에러 탐지
+- 필수 폴더 구조·`.gitignore` 확인
+
+---
+
+### 8. `/refactor [대상]` — 리팩토링
+
+**Plan Mode가 강제 활성화**되어 규모 확정 전까지 파일 수정이 차단됩니다.
 
 | 규모 | 기준 | 처리 |
 |------|------|------|
 | Small | 메서드 추출·네이밍·중복 제거 (1~2개 파일) | Plan Mode 해제 후 즉시 수정 |
 | Medium | 클래스 분리·패턴 교체 (3~5개 파일) | 플랜 제시 → 승인 → Plan Mode 해제 → 단계별 수정 |
-| Large | 아키텍처 변경·크로스 시스템 (6개+ 파일) | `architect-planner` 에이전트 위임 |
+| Large | 아키텍처 변경·크로스 시스템 (6개+ 파일) | `architect-planner` 위임 |
 
-1. 시작 시 **Plan Mode 강제 활성화** — 규모 확정 전까지 파일 수정 차단.
-2. `codebase-explorer`가 역참조(이 코드를 참조하는 파일)와 기존 리팩토링 이력(`docs/refactor/`)을 파악합니다.
-3. 규모를 판단해 처리 방식 결정 → Plan Mode 해제.
-4. 완료 후 `docs/refactor/이력.md`에 날짜·변경 내용·개선 효과를 저장합니다.
-5. `verifier` 에이전트로 컴파일 오류 없음을 검증합니다.
+완료 후 `docs/refactor/이력.md`에 날짜·변경 내용·개선 효과 저장, `verifier`로 컴파일 오류 검증.
 
 ---
 
-### 5. 문서 생성 — 자동 + `/doc`
+### 9. `/fix [오류]` — 버그 수정
 
-**자동 생성 (git commit 시):**
-- `git commit`을 실행할 때마다 pre-commit hook이 변경된 `.cs` 파일을 분석합니다.
-- Critical 이슈가 없으면 `docs/analysis/` 아래에 기능 단위 분석 문서를 자동 생성·업데이트합니다.
-- 문서는 코드와 함께 같은 커밋에 포함됩니다.
+오류 메시지, 스택 트레이스, 파일 경로 중 하나를 전달합니다.
 
-**수동 생성 (`/doc`):**
+- 입력 파싱 → `debugger` 에이전트 위임
+- `debugger`가 원인 진단 + 수정 코드 제시 (using 누락 자동 검증 포함)
+- 승인 시 파일 직접 수정
+- 수정 후 컴파일 오류 grep 재검증
+
+---
+
+### 10. `/analyze [대상]` — 코드 분석
+
+코드·기능·시스템을 분석해 사람이 읽기 좋은 형태로 출력합니다.
+
+- `codebase-explorer`가 구조 탐색
+- 역할·의존 관계·패턴·개선 포인트 요약
+- 저장 여부 확인 → `docs/analysis/` 에 저장 (같은 카테고리 기존 문서 병합)
+
+---
+
+### 11. `/git-summary` — 커밋 메시지 제안
+
+변경사항을 분석해 논리적 커밋 단위와 메시지를 제안합니다.
+
+- `git status` + `git diff --stat` + `git log` 분석
+- 변경 파일을 논리적 단위로 분리
+- 커밋 타입 자동 선택 + 메시지 제안
+- 민감 정보·`.meta` 누락 주의사항 포함
+- "이 단위로 커밋할까요?" 확인 후 실행
+
+---
+
+### 12. `/doc readme|handover|delivery` — 문서 생성
 
 | 서브커맨드 | 생성 위치 | 내용 |
 |-----------|----------|------|
 | `/doc readme` | `README.md` | 프로젝트 개요·구조·빌드 방법 |
-| `/doc handover [시스템명]` | `docs/guide/HANDOVER_*.md` | 외주 개발자용 인수인계 문서 |
+| `/doc handover [시스템명]` | `docs/guide/HANDOVER_*.md` | 외주 개발자용 인수인계 문서 (의존성 맵 Mermaid 포함) |
 | `/doc delivery [버전] [날짜]` | `docs/guide/DELIVERY_*.md` | 클라이언트 납품 문서 |
 
----
-
-### 6. Git 커밋 — pre-commit hook
-
-`git commit` 실행 시 **자동으로 3단계**가 실행됩니다.
-
-```mermaid
-flowchart TD
-    A([git commit]) --> B["[0/3] .meta 파일 확인"]
-    B --> C{누락 있음?}
-    C -- 자동 추가 가능 --> D[git add .meta]
-    D --> E{여전히 누락?}
-    E -- Yes --> BLOCK1([❌ 커밋 차단])
-    E -- No --> F
-    C -- 없음 --> F["[1/3] Unity 컴파일 검증\nMCP → batchmode 순서로 확인"]
-    F --> G{컴파일 에러?}
-    G -- Yes --> BLOCK2([❌ 커밋 차단])
-    G -- No --> H["[2/3] 코드 리뷰\n변경 .cs 파일 일괄 리뷰"]
-    H --> I{Critical?}
-    I -- Yes --> BLOCK3([❌ 커밋 차단])
-    I -- No --> J["[3/3] 문서 자동화\ndocs/analysis/ 생성·업데이트"]
-    J --> K([✅ 커밋 완료])
-```
-
-커밋 메시지는 `/git-summary`로 논리적 단위와 메시지를 제안받을 수 있습니다.
-
-긴급 시 리뷰 생략:
-```bash
-git commit --no-verify -m "[hotfix] 긴급 수정"
-```
+`doc-writer` 에이전트가 소스 코드를 직접 읽고 추측 없이 문서를 작성합니다.
 
 ---
 
-## 실제 작업 워크플로우
+### 13. `/setup-check` — 설치 상태 점검
 
-### 새 프로젝트 시작
+플러그인 설치 상태와 프로젝트 초기화 상태를 진단합니다.
 
-```mermaid
-flowchart LR
-    A([프로젝트 루트]) --> B[/setup\nCLAUDE.md + hook 설치\nfeature_list.json 생성]
-    B --> C[/deep-interview\n요구사항 구조화\nfeature_list.json 항목 채우기]
-    C --> D([개발 시작])
-```
+- pre-commit hook 설치 여부
+- `CLAUDE.md` 스택 설정 여부
+- `feature_list.json` · `claude-progress.txt` 존재 여부
+- 문제 발견 시 수정 방법 안내
 
-### 매 작업 세션 흐름
+---
 
-```mermaid
-flowchart TD
-    START([Claude Code 실행]) --> SI[SessionStart hook\n세 파일 컨텍스트 자동 주입]
-    SI --> CL{복구 요약\n필요?}
-    CL -- Yes --> CLL[/context-load\n상태 정리 + 다음 작업 제안]
-    CL -- No --> DEV
-    CLL --> DEV
+### 14. `/unity-setup-mcp` — Unity MCP 연동
 
-    DEV[feature_list에서\npasses:false 항목 선택] --> PLAN[/plan 기능명]
-    PLAN --> CODE[코드 구현\nPreToolUse: C# 규칙 자동 주입]
-    CODE --> REVIEW[/review\nCritical 0건 확인]
-    REVIEW --> VERIFY[verifier\npasses:true 판정]
-    VERIFY --> MORE{다음 기능?}
-    MORE -- Yes --> DEV
-    MORE -- No --> END
+CoplayDev/unity-mcp 서버를 현재 프로젝트에 연동합니다. 연동 후 `/unity-console`, `/unity-test`, `/unity-scene-audit` 사용 가능.
 
-    CODE -.->|매 응답| STOP[Stop hook\nsavedAt 갱신 - 비용 0]
-    CODE -.->|컨텍스트 압축 시| COMPACT[PreCompact hook\nproject-memory + progress 갱신]
+---
 
-    END([대화 종료]) --> SE[SessionEnd hook\nclaude-progress.txt\n플레이스홀더 자동 기록]
-    SE --> CS{즉시 저장\n+ 커밋 필요?}
-    CS -- Yes --> CSave[/context-save\n상세 저장 + git commit]
-    CS -- No --> DONE([완료])
-    CSave --> DONE
-```
+### 15. `/unity-console` — 콘솔 분석 _(UnityMCP 필요)_
 
-### 외주·납품 시
+Unity 콘솔 로그를 읽어 에러·경고를 분류하고 원인 및 수정 방법을 제안합니다.
 
-```mermaid
-flowchart LR
-    A[/doc handover 시스템명] --> B[docs/guide/HANDOVER_*.md\n역할·API·주의사항·의존성 맵]
-    C[/doc delivery v1.0.0 날짜] --> D[docs/guide/DELIVERY_*.md\n구현 기능·실행 방법·제한사항]
-```
+---
+
+### 16. `/unity-test [EditMode|PlayMode|All]` — 테스트 실행 _(UnityMCP 필요)_
+
+Unity Test Runner를 실행하고 결과를 분석합니다. 실패 항목의 원인과 수정 방법을 제안합니다. 기본값은 EditMode.
+
+---
+
+### 17. `/unity-scene-audit` — 씬 감사 _(UnityMCP 필요)_
+
+현재 Unity 씬의 구조를 분석하여 품질 이슈를 보고합니다.
+
+- Missing 컴포넌트 탐지
+- 네이밍 규칙 위반 (PFB\_, MAT\_ 등)
+- 성능 이슈 (과도한 Draw Call, 비활성 오브젝트 등)
+- 구조적 문제 (중첩 깊이, 빈 GameObject 등)
 
 ---
 

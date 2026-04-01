@@ -22,6 +22,22 @@ keywords: [doc, readme, handover, delivery, documentation, guide]
 
 요청: $ARGUMENTS
 
+## Mermaid 작성 규칙 (Mermaid 8.8.0 호환)
+
+문서 내 다이어그램 작성 시 반드시 준수한다.
+노드 레이블에 `/` `?` `:` `*` `[` `]` 특수문자, 또는 `\n`+`?` 조합이 포함되면 **큰따옴표**로 감싼다.
+이모지는 노드 레이블에 사용하지 않는다.
+
+```
+# 올바른 예
+flowchart LR
+    A["/doc handover 시스템명"] --> B{"승인?"}
+
+# 잘못된 예
+flowchart LR
+    A[/doc handover 시스템명] --> B{승인?}
+```
+
 ## 라우팅
 
 첫 번째 인자로 서브커맨드를 결정한다:
