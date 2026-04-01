@@ -43,7 +43,7 @@
           {
             "type": "agent",
             "model": "haiku",
-            "prompt": "컨텍스트 압축 전에 현재 작업 상태를 .claude/project-memory.json에 저장하세요. 대화 내용을 바탕으로 { \"currentFeature\": \"작업 중인 기능명\", \"currentStep\": \"현재 진행 단계\", \"changedFiles\": [\"변경된 파일 경로 목록\"], \"decisions\": [\"설계 결정과 이유\"], \"criticalIssues\": [\"발견된 Critical 이슈\"], \"nextAction\": \"다음에 할 작업\", \"savedAt\": \"저장 시각\" } 형식으로 작성하세요. 기존 파일이 있으면 최신 내용으로 갱신하세요.",
+            "prompt": "컨텍스트 압축 전에 두 파일을 순서대로 갱신하세요.\n\n## 1. .claude/project-memory.json 갱신\n대화 내용을 바탕으로 아래 형식으로 작성하세요:\n{ \"currentFeature\": \"작업 중인 기능명\", \"currentStep\": \"현재 진행 단계\", \"changedFiles\": [\"변경된 파일 경로 목록\"], \"decisions\": [\"설계 결정과 이유\"], \"criticalIssues\": [\"발견된 Critical 이슈\"], \"nextAction\": \"다음에 할 작업\", \"savedAt\": \"현재 UTC 시각\" }\n기존 파일이 있으면 최신 내용으로 갱신 (decisions 배열은 append).\n\n## 2. .claude/claude-progress.txt 갱신\n1. 파일 Read\n2. '(작업 내용 분석 중...)' 행을 찾아 실제 작업 한 줄 요약으로 교체, 완료 여부를 ✅ 또는 🔄 로 업데이트\n   행이 없으면 테이블 끝에 오늘 날짜로 새 행 추가\n3. '## 현재 진행 상황' 섹션을 이번 세션 기준 2~3줄로 갱신\n4. '## 다음 작업' 섹션을 .claude/feature_list.json의 passes:false 항목 기준으로 갱신\n5. '## 알려진 이슈' 에 새 이슈 추가 (없으면 유지)\n6. Write\n\n이번 세션이 단순 Q&A만이었으면 claude-progress.txt의 '(작업 내용 분석 중...)' 행을 삭제하고 종료.",
             "timeout": 60
           }
         ]
@@ -54,14 +54,8 @@
         "matcher": "*",
         "hooks": [
           {
-            "type": "agent",
-            "model": "haiku",
-            "prompt": "세션이 종료됩니다. 아래 규칙에 따라 .claude/claude-progress.txt를 업데이트하세요.\n\n판단 기준:\n- 코드 수정·설계 결정·기능 구현·버그 수정 등 실질적 작업이 있었으면 → 업데이트\n- 단순 질문·조회·설명 요청만 있었으면 → '[session-end] 작업 내용 없음 — 생략' 출력 후 종료\n\n업데이트 절차:\n1. .claude/claude-progress.txt Read (없으면 아래 템플릿으로 새로 생성)\n2. '## 세션 이력' 테이블에 오늘 작업 한 줄 append:\n   | YYYY-MM-DD | 핵심 작업 한 줄 요약 | ✅ 완료 또는 🔄 진행 중 |\n3. '## 현재 진행 상황' 섹션을 이번 세션 기준으로 갱신 (2~3줄)\n4. '## 다음 작업' 섹션을 .claude/feature_list.json의 passes:false 항목 기준으로 갱신\n5. '## 알려진 이슈' 섹션에 새로 발견된 이슈 추가 (없으면 유지)\n6. Write 완료 후 '[session-end] claude-progress.txt 갱신 완료' 한 줄 출력\n\n템플릿 (파일 없을 때):\n# 프로젝트 진행 상황\n\n## 프로젝트 정보\n프로젝트: [프로젝트명]\n타입: Unity\n마지막 업데이트: YYYY-MM-DD\n\n## 세션 이력\n| 날짜 | 작업 내용 | 완료 여부 |\n|------|----------|----------|\n\n## 현재 진행 상황\n\n## 다음 작업\n\n## 주요 설계 결정\n\n## 알려진 이슈",
-            "timeout": 60
-          },
-          {
             "type": "command",
-            "command": "rm -f .claude/.context_loaded",
+            "command": "NOW=$(date -u '+%Y-%m-%d') && PROG=.claude/claude-progress.txt && if [ -f \"$PROG\" ]; then grep -q \"^| $NOW\" \"$PROG\" || printf '| %s | (작업 내용 분석 중...) | 🔄 |\\n' \"$NOW\" >> \"$PROG\"; else printf '# 프로젝트 진행 상황\\n\\n## 세션 이력\\n| 날짜 | 작업 내용 | 완료 여부 |\\n|------|----------|----------|\\n| %s | (작업 내용 분석 중...) | 🔄 |\\n\\n## 현재 진행 상황\\n\\n## 다음 작업\\n\\n## 주요 설계 결정\\n\\n## 알려진 이슈\\n' \"$NOW\" > \"$PROG\"; fi && rm -f .claude/.context_loaded",
             "timeout": 5
           }
         ]
