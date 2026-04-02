@@ -369,8 +369,8 @@ Unity 프로젝트 루트에서 최초 1회 실행합니다.
 
 - `codebase-explorer`가 인터페이스·부모 클래스·역참조 탐색 (병렬)
 - `unity-reviewer`가 독립 평가자 관점으로 리뷰:
-  - 성능: `Update()` 안의 `GetComponent`·`new`·LINQ
-  - Unity 규칙: **`using` 누락 (🔴 Critical)**, public 필드 노출, Resources.Load, 구형 Input, 이벤트 해제 누락
+  - 성능: `Update()` 안의 `GetComponent`·`Find*` 계열·`new`·LINQ
+  - Unity 규칙: **`using` 누락 (🔴 Critical)**, public 필드 노출, `Resources.Load`, 구형 Input, `renderer.material` 반복 접근, `Task.Delay → Awaitable`, `FindObjectOfType` deprecated, 이벤트 해제 누락
   - 아키텍처: SRP 위반, 싱글턴 남용, 강한 결합
   - 안전성: null 참조, 씬 전환 참조 유실, CancellationToken 미전달
 
@@ -517,9 +517,11 @@ Update 루프·GC Alloc·Draw Call 위험 패턴을 탐지합니다.
 | 탐지 항목 | 심각도 |
 |---------|--------|
 | `Update` 내 `GetComponent` 호출 | 🔴 Critical |
+| `Update` 내 `Find*` 계열 호출 | 🔴 Critical |
 | `Update` 내 `Instantiate/Destroy` (ObjectPool 미사용) | 🔴 Critical |
 | `Update` 내 `new` · LINQ · `string+` | 🔴 Critical |
-| `FindObjectOfType` — `Update` 외부 사용 | 🟡 Warning |
+| `renderer.material` 반복 접근 (캐싱 누락) | 🟡 Warning |
+| `FindObjectOfType` / `FindObjectsOfType` — deprecated API 사용 | 🟡 Warning |
 | 이벤트 구독 후 해제 누락 위험 | 🟡 Warning |
 
 Critical 항목마다 수정 코드 예시를 함께 제시합니다.
@@ -596,3 +598,14 @@ verifier 실행 → PASS → 완료 ✅
 - Claude Code CLI
 - Unity 6 LTS
 - Git (Windows: Git Bash / macOS: 기본 터미널)
+
+---
+
+## 변경 이력
+
+| 버전 | 주요 변경 |
+|------|----------|
+| v1.0.37 | engines/unity.md 오류 수정 — `m_childRenderer` 선언 누락, TryGetComponent 주석 정확화, `OnDestroy` 생명주기 예제 추가, 직렬화 규칙 경량화 |
+| v1.0.36 | unity-reviewer 체크 항목 개선 — `renderer.material` 규칙 수정, `Find*` 계열 혼동 해소, `Task.Delay → Awaitable` 체크 추가 |
+| v1.0.35 | hooks 개선 — Stop 훅 `savedAt` 필드 생성, 컴파일 체크 디바운스 구조 개편 |
+| v1.0.34 | engines/unity.md Unity 6 기준 전면 업데이트 — `FindAnyObjectByType`, `Awaitable`, `TryGetComponent`, `ObjectPool`, `RequireComponent`, `StringBuilder`, `using` 체크 섹션 추가 |
