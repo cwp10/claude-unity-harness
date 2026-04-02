@@ -38,6 +38,12 @@
             "type": "command",
             "command": "mkdir -p .claude && NOW=$(date -u '+%Y-%m-%dT%H:%M:%SZ') && MEM=.claude/project-memory.json && LAST=$(git log --oneline -1 2>/dev/null | sed 's/^[a-f0-9]* //' | tr -d '\"' | tr -d '\\r\\n' || echo \"\") && BR=$(git branch --show-current 2>/dev/null | tr -d '\\r\\n' || echo \"\") && CF=$(git status --porcelain 2>/dev/null | awk '{print $NF}' | grep -v '^$' | awk 'BEGIN{ORS=\",\"}{print \"\\\"\" $0 \"\\\"\"}' | sed 's/,$//') && if [ -f \"$MEM\" ]; then if command -v python3 >/dev/null 2>&1; then CLAUDE_CF=\"[$CF]\" python3 -c 'import json,sys,os; mem=sys.argv[1]; d=json.load(open(mem)); d.update({\"changedFiles\":json.loads(os.environ.get(\"CLAUDE_CF\",\"[]\")),\"lastCommit\":sys.argv[2],\"branch\":sys.argv[3],\"savedAt\":sys.argv[4]}); open(mem,\"w\").write(json.dumps(d,indent=2,ensure_ascii=False))' \"$MEM\" \"$LAST\" \"$BR\" \"$NOW\" 2>/dev/null || true; else for FV in \"savedAt=$NOW\" \"lastCommit=$LAST\" \"branch=$BR\"; do F=\"${FV%%=*}\"; V=\"${FV#*=}\"; if grep -q \"\\\"$F\\\"\" \"$MEM\"; then if [ \"$(uname)\" = \"Darwin\" ]; then sed -i '' \"s/\\\"$F\\\":\\\"[^\\\"]*\\\"/\\\"$F\\\":\\\"$V\\\"/\" \"$MEM\" || true; else sed -i \"s/\\\"$F\\\":\\\"[^\\\"]*\\\"/\\\"$F\\\":\\\"$V\\\"/\" \"$MEM\" || true; fi; else if [ \"$(uname)\" = \"Darwin\" ]; then sed -i '' \"\\$s/}$/,\\\"$F\\\":\\\"$V\\\"}/\" \"$MEM\" || true; else sed -i \"\\$s/}$/,\\\"$F\\\":\\\"$V\\\"}/\" \"$MEM\" || true; fi; fi; done; fi; else printf '{\"currentFeature\":\"\",\"changedFiles\":[%s],\"lastCommit\":\"%s\",\"branch\":\"%s\",\"savedAt\":\"%s\"}\\n' \"$CF\" \"$LAST\" \"$BR\" \"$NOW\" > \"$MEM\"; fi",
             "timeout": 5
+          },
+          {
+            "type": "agent",
+            "model": "haiku",
+            "prompt": "1. .claude/.pending_compile_check 파일을 Bash로 확인하세요: `[ -f .claude/.pending_compile_check ] && cat .claude/.pending_compile_check`\n2. 파일이 없으면 즉시 종료 (아무것도 출력하지 않음)\n3. 파일이 있으면:\n   a. mcp__UnityMCP__read_console 툴을 호출해 컴파일 에러를 확인하세요\n   b. Error 레벨 로그만 필터링해서 출력하세요\n   c. 에러 없으면 아무것도 출력하지 않음\n   d. Bash로 플래그 파일 삭제: `rm -f .claude/.pending_compile_check`",
+            "timeout": 30
           }
         ]
       }
@@ -79,7 +85,7 @@
         "hooks": [
           {
             "type": "command",
-            "command": "FILE=$(echo \"$CLAUDE_TOOL_INPUT\" | grep -o '\"file_path\" *: *\"[^\"]*\"' | grep -o '\"[^\"]*\"$' | tr -d '\"' 2>/dev/null || true); if echo \"$FILE\" | grep -q '\\.cs$' && [ -n \"$FILE\" ]; then if [ ! -f \"${FILE}.meta\" ]; then echo \"[claude-unity-harness] ⚠️ .meta 파일 없음: ${FILE}.meta → Unity Editor를 열어 자동 생성하거나 pre-commit hook이 처리합니다.\"; fi; MCP_OK=false; if command -v curl > /dev/null 2>&1 && curl -s --max-time 1 http://127.0.0.1:8080 > /dev/null 2>&1; then MCP_OK=true; elif command -v powershell > /dev/null 2>&1 && powershell -NoProfile -Command \"try{(New-Object System.Net.Sockets.TcpClient('127.0.0.1',8080)).Close();exit 0}catch{exit 1}\" 2>/dev/null; then MCP_OK=true; fi; if [ \"$MCP_OK\" = true ]; then COOLDOWN=.claude/.last_compile_check; NOW=$(date +%s); LAST=0; [ -f \"$COOLDOWN\" ] && LAST=$(cat \"$COOLDOWN\" 2>/dev/null || echo 0); ELAPSED=$((NOW - LAST)); if [ \"$ELAPSED\" -ge 5 ]; then echo \"$NOW\" > \"$COOLDOWN\"; echo \"[UNITY_MCP] $(basename $FILE) 저장됨 — read_console 툴로 컴파일 에러를 확인하세요.\"; fi; fi; fi",
+            "command": "FILE=$(echo \"$CLAUDE_TOOL_INPUT\" | grep -o '\"file_path\" *: *\"[^\"]*\"' | grep -o '\"[^\"]*\"$' | tr -d '\"' 2>/dev/null || true); if echo \"$FILE\" | grep -q '\\.cs$' && [ -n \"$FILE\" ]; then if [ ! -f \"${FILE}.meta\" ]; then echo \"[claude-unity-harness] ⚠️ .meta 파일 없음: ${FILE}.meta → Unity Editor를 열어 자동 생성하거나 pre-commit hook이 처리합니다.\"; fi; mkdir -p .claude && echo \"$FILE\" >> .claude/.pending_compile_check; fi",
             "timeout": 5
           }
         ]
