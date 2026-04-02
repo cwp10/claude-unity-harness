@@ -20,6 +20,16 @@ keywords: [plan, architecture, design, feature, system]
 
 요청: $ARGUMENTS
 
+## 플래그 처리
+
+`$ARGUMENTS`에 `--ship` 포함 여부 확인:
+- `--ship` 있음 → **ship 맥락** — 3단계 "코드 구현을 시작할까요?" 확인 생략, 자동 진행
+- `--ship` 없음 → 일반 플랜 모드 — 기존 흐름 그대로
+
+기능명은 `--ship`을 제외한 나머지 텍스트로 처리한다.
+
+---
+
 ## 실행 순서
 
 ### 0단계: Plan Mode 진입
@@ -70,5 +80,6 @@ architect-planner 의 설계 플랜을 그대로 출력한다.
 
 1. architect-planner 가 docs/architecture/기능명-설계.md 자동 저장
 2. .claude/feature_list.json 에 해당 기능 항목 추가 (`passes: false` 로 시작)
-3. "코드 구현을 시작할까요?" 확인
-4. 확인 시 메인 Claude가 구현 플랜대로 단계별 코드 생성
+3. **ship 맥락(`--ship`)이면** → "코드 구현을 시작합니다." 출력 후 자동 진행
+   **일반 맥락이면** → "코드 구현을 시작할까요?" 확인
+4. 확인(또는 자동 진행) 시 메인 Claude가 구현 플랜대로 단계별 코드 생성

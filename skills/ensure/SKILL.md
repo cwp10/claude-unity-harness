@@ -29,6 +29,31 @@ keywords: [ensure, verify, retry, fix, guarantee, completion]
 
 ## 실행 순서
 
+### Autopilot 상태 확인
+
+`.claude/settings.json`을 읽어 `permissions.allow`에 `"Bash(*)"` 포함 여부 확인.
+
+> `/ship`에서 호출된 경우 이 체크를 생략한다 (이미 0단계에서 확인됨).
+
+**OFF 상태이면:**
+```
+⚠️  Autopilot이 꺼져 있습니다.
+
+검증·수정 중 Write·Edit·Bash 도구 사용 시 매번 승인 팝업이 발생합니다.
+완전 자동화를 원하면:
+
+  1. /autopilot on
+  2. 세션 재시작
+  3. /ensure 재실행
+
+지금 그대로 진행하려면 계속하세요.
+```
+→ 사용자가 계속 진행하면 그대로 검증 루프 시작.
+
+**ON 상태이면:** 아무 메시지 없이 검증 루프 바로 시작.
+
+---
+
 ### 시작 전 준비
 
 대상 파악:

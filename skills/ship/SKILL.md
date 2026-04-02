@@ -23,6 +23,7 @@ keywords: [ship, pipeline, workflow, end-to-end, development]
 ## Ship 개요
 
 ```
+0단계: Autopilot 상태 확인 (OFF면 경고)
 1단계: 요구사항 확인       (자동)
 2단계: 설계 플랜           (승인 필요 — 이후 자동)
 3단계: 코드 구현           (자동)
@@ -33,6 +34,29 @@ keywords: [ship, pipeline, workflow, end-to-end, development]
 
 **승인 포인트는 2단계(설계 플랜) 1회뿐입니다.**
 승인 후 구현 → 리뷰 → 감사 → 검증까지 자동으로 진행합니다.
+
+---
+
+## 0단계: Autopilot 상태 확인
+
+`.claude/settings.json`을 읽어 `permissions.allow`에 `"Bash(*)"` 포함 여부 확인:
+
+**OFF 상태이면:**
+```
+⚠️  Autopilot이 꺼져 있습니다.
+
+/ship 진행 중 Write·Edit·Bash 도구 사용 시 매번 승인 팝업이 발생합니다.
+완전 자동화를 원하면:
+
+  1. /autopilot on
+  2. 세션 재시작
+  3. /ship $ARGUMENTS 재실행
+
+지금 그대로 진행하려면 계속하세요.
+```
+→ 사용자가 계속 진행하면 그대로 1단계 시작.
+
+**ON 상태이면:** 아무 메시지 없이 1단계 바로 시작.
 
 ---
 
@@ -48,7 +72,7 @@ keywords: [ship, pipeline, workflow, end-to-end, development]
 
 ## 2단계: 설계 플랜 ← 유일한 승인 포인트
 
-`/plan $ARGUMENTS` 실행.
+`/plan --ship $ARGUMENTS` 실행.
 
 - codebase-explorer가 기존 코드베이스 탐색
 - architect-planner가 클래스 다이어그램 + 대안 2가지 제시
@@ -64,6 +88,8 @@ keywords: [ship, pipeline, workflow, end-to-end, development]
 승인 시 → 3단계부터 자동 진행
 수정 요청 시 → 플랜 수정 후 재승인
 중단 시 → 종료, 플랜은 docs/architecture/ 에 저장됨
+
+> `--ship` 플래그로 인해 `/plan` 내부의 "코드 구현을 시작할까요?" 확인은 자동 통과됩니다.
 
 ---
 
@@ -81,7 +107,8 @@ keywords: [ship, pipeline, workflow, end-to-end, development]
 
 ## 4단계: 코드 리뷰 (자동)
 
-`/review` 실행 (변경 파일 자동 감지).
+`/review` 실행 — 3단계에서 생성된 **변경 파일 전체를 대상**으로 지정한다.
+(파일이 여러 개일 때 선택 팝업 없이 전체 리뷰 진행)
 
 | 결과 | 처리 |
 |------|------|
