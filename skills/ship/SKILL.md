@@ -98,7 +98,7 @@ keywords: [ship, pipeline, workflow, end-to-end, development]
 승인된 설계 플랜 기반으로 코드를 구현한다.
 
 - docs/architecture/ 에 저장된 설계 문서 참조
-- Unity 코딩 규칙 (engines/unity.md) 준수
+- Unity 코딩 규칙 (.claude/rules/unity-engine.md) 준수
 - feature_list.json 에 `passes: false` 항목 추가
 
 완료 후 → 4단계 자동 진행

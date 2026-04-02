@@ -28,8 +28,13 @@ keywords: [setup, check, doctor, diagnose, install, health]
 
 ### 2. .claude/CLAUDE.md 설정
 - 파일 존재 여부
-- `@engines/unity.md` 활성화 여부 (주석 처리 안 됐는지)
-- `@languages/csharp.md` 활성화 여부
+
+### 2-1. .claude/rules/ 규칙 파일
+```bash
+[ -f .claude/rules/unity-engine.md ] && echo "OK" || echo "MISSING"
+[ -f .claude/rules/unity-domain.md ] && echo "OK" || echo "MISSING"
+[ -f .claude/rules/csharp.md ]       && echo "OK" || echo "MISSING"
+```
 
 ### 3. 하네스 파일
 ```bash
@@ -63,7 +68,9 @@ cat ProjectSettings/ProjectVersion.txt 2>/dev/null | grep "m_EditorVersion" || e
 | 항목 | 상태 | 비고 |
 |------|------|------|
 | pre-commit hook | ✅/❌ | |
-| CLAUDE.md 스택 규칙 | ✅/⚠️ | engines/unity.md 활성화 여부 |
+| CLAUDE.md | ✅/⚠️ | 파일 존재 여부 |
+| .claude/rules/unity-engine.md | ✅/❌ | /setup 으로 복사되어야 함 |
+| .claude/rules/csharp.md | ✅/❌ | /setup 으로 복사되어야 함 |
 | .claude/feature_list.json | ✅/❌ | |
 | .claude/project-memory.json | ✅/⚠️ | 없으면 /context-save 로 생성 |
 | .claude/claude-progress.txt | ✅/⚠️ | |

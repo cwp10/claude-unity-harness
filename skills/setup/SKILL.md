@@ -134,8 +134,8 @@ basename $(pwd)
 
 ### 5단계: 컨텍스트 파일 복사
 
-플러그인 캐시에서 `engines/`, `languages/`, `domains/` 파일을 사용자 프로젝트의 `.claude/` 에 복사한다.
-CLAUDE.md의 `@engines/unity.md` 등 @-reference가 올바르게 해결되려면 이 파일들이 반드시 필요하다.
+플러그인 캐시에서 `rules/` 파일을 사용자 프로젝트의 `.claude/rules/` 에 복사한다.
+`.claude/rules/` 파일은 Claude Code가 자동 발견하며, `paths:` frontmatter 조건에 맞는 파일을 읽을 때 자동 로드된다.
 
 ```bash
 PLUGIN_ROOT=$(find "$HOME/.claude/plugins/cache" \
@@ -242,10 +242,10 @@ fi
 Unity:    [버전]
 설정파일: .claude/CLAUDE.md
 
-로드된 스택:
-  @engines/unity.md
-  @languages/csharp.md
-  @domains/unity.md
+로드된 규칙 (.claude/rules/ — paths 조건부 자동 로드):
+  csharp.md        → **/*.cs
+  unity-engine.md  → Assets/**/*.cs
+  unity-domain.md  → Assets/**/*.cs
 
 생성된 파일:
   .claude/claude-progress.txt
