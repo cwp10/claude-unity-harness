@@ -188,35 +188,13 @@ fi
 
 **파일 2: .claude/feature_list.json**
 
-CLAUDE.md의 "프로젝트 성격"이 이미 채워져 있으면 그에 맞는 템플릿,
-아직 미정이면 게임 기본 템플릿으로 생성한다.
+항상 빈 배열로 생성한다. 샘플 항목 절대 삽입 금지.
 
-게임:
 ```json
-[
-  { "id": "F001", "category": "core", "description": "씬 로드 및 기본 화면 진입", "passes": false },
-  { "id": "F002", "category": "core", "description": "플레이어 입력 처리", "passes": false },
-  { "id": "F003", "category": "core", "description": "카메라 제어", "passes": false }
-]
+[]
 ```
 
-산업 시뮬레이션:
-```json
-[
-  { "id": "F001", "category": "core", "description": "시뮬레이션 씬 로드 및 초기화", "passes": false },
-  { "id": "F002", "category": "core", "description": "장비·오브젝트 인터랙션", "passes": false },
-  { "id": "F003", "category": "core", "description": "시뮬레이션 상태 저장/불러오기", "passes": false }
-]
-```
-
-교육 콘텐츠:
-```json
-[
-  { "id": "F001", "category": "core", "description": "학습 씬 로드 및 진입", "passes": false },
-  { "id": "F002", "category": "core", "description": "학습 단계 진행 흐름", "passes": false },
-  { "id": "F003", "category": "core", "description": "퀴즈·평가 결과 저장", "passes": false }
-]
-```
+기능 항목은 `/plan` 또는 `/deep-interview` 실행 시 추가된다.
 
 **중요 규칙:**
 - 기능 항목 삭제·description 수정 금지
