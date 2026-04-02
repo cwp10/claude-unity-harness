@@ -41,9 +41,9 @@ avoidWhen: 버그 수정, 새 기능 구현, 코드 직접 수정 요청. 파일
 - 대상 파일 전체를 Read로 읽는다
 - 관련 인터페이스·부모 클래스가 있으면 함께 읽는다
 - 프로젝트의 CLAUDE.md 확인 (특이사항 파악)
-- 직렬화·이벤트 관련 분석 시 `.claude/engines/unity/serialization.md` Read
-- 캐싱·이벤트 구독 관련 분석 시 `.claude/engines/unity/caching.md` Read
-- 비동기·풀링 관련 분석 시 `.claude/engines/unity/async.md` Read
+- 직렬화·이벤트 관련 분석 시 `.claude/rules/unity/serialization.md` Read
+- 캐싱·이벤트 구독 관련 분석 시 `.claude/rules/unity/caching.md` Read
+- 비동기·풀링 관련 분석 시 `.claude/rules/unity/async.md` Read
 
 ### 3단계: 분석
 

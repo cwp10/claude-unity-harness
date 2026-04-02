@@ -35,9 +35,9 @@ avoidWhen: 새 기능 개발, 코드 리뷰, 리팩토링, 아키텍처 설계. 
 **Unity 추가 탐색:**
 - 관련 ScriptableObject 설정 파악
 - Awake/Start 초기화 순서 확인
-- 비동기 관련 오류: `.claude/engines/unity/async.md` Read (존재 시)
-- 직렬화·네임스페이스 오류: `.claude/engines/unity/serialization.md` Read (존재 시)
-- 캐싱·이벤트 오류: `.claude/engines/unity/caching.md` Read (존재 시)
+- 비동기 관련 오류: `.claude/rules/unity/async.md` Read (존재 시)
+- 직렬화·네임스페이스 오류: `.claude/rules/unity/serialization.md` Read (존재 시)
+- 캐싱·이벤트 오류: `.claude/rules/unity/caching.md` Read (존재 시)
 
 ### 3. 원인 진단
 

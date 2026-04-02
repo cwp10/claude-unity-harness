@@ -8,10 +8,10 @@ Unity(게임·산업·교육) 프로젝트 운영.
 @rules/response.md
 @rules/git.md
 @rules/code-review.md
-# 아래 3줄은 /setup 실행 시 자동으로 활성화됩니다:
-# @engines/unity.md
-# @languages/csharp.md
-# @domains/unity.md
+# Unity·C# 규칙은 .claude/rules/ 에서 paths 조건부로 자동 로드됩니다:
+# - csharp.md        → **/*.cs
+# - unity-engine.md  → Assets/**/*.cs
+# - unity-domain.md  → Assets/**
 
 ## 프로젝트 초기화
 /setup 실행 시 이 파일 끝에 스택·버전·폴더 구조가 자동으로 추가됩니다.
