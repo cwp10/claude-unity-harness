@@ -19,6 +19,22 @@ keywords: [save, commit, session, progress, end]
 
 ## 실행 순서
 
+### 0단계: 절대 경로 확보 (필수)
+
+**파일 쓰기 전에 반드시 먼저 실행한다.**
+
+```bash
+git rev-parse --show-toplevel 2>/dev/null || pwd
+```
+
+출력된 경로를 `PROJECT_ROOT` 로 기억한다.
+이후 모든 파일 쓰기는 반드시 절대 경로를 사용한다:
+- `<PROJECT_ROOT>/.claude/claude-progress.txt`
+- `<PROJECT_ROOT>/.claude/project-memory.json`
+- `<PROJECT_ROOT>/.claude/feature_list.json`
+
+> ⚠️ 절대 경로 없이 `.claude/...` 상대 경로로 Write를 호출하면 반드시 실패한다.
+
 ### 1단계: 현재 상태 수집
 
 ```bash
@@ -28,7 +44,7 @@ git diff --stat 2>/dev/null || echo ""
 git status --short 2>/dev/null || echo ""
 ```
 
-기존 `.claude/claude-progress.txt` 읽기 (있으면).
+기존 `<PROJECT_ROOT>/.claude/claude-progress.txt` 읽기 (있으면).
 
 ### 2단계: 이번 세션 작업 파악
 

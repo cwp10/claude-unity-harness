@@ -18,9 +18,23 @@ keywords: [setup, init, project, unity, harness]
 
 ## 실행 순서
 
+### 0단계: 절대 경로 확보 (필수)
+
+```bash
+pwd
+```
+
+출력된 경로를 `PROJECT_ROOT` 로 기억한다.
+이후 모든 파일 접근(Read·Write)은 반드시 절대 경로를 사용한다:
+- `<PROJECT_ROOT>/.claude/claude-progress.txt`
+- `<PROJECT_ROOT>/.claude/feature_list.json`
+- `<PROJECT_ROOT>/.claude/CLAUDE.md`
+
+> ⚠️ Write 도구는 절대 경로가 필수. 상대 경로 사용 시 반드시 실패한다.
+
 ### 1단계: 초기화 여부 확인
 
-`.claude/claude-progress.txt` 존재 여부 확인 (Read 시도).
+`<PROJECT_ROOT>/.claude/claude-progress.txt` 존재 여부 확인 (Read 시도).
 
 파일이 있고 `--force` 인자가 없으면:
 ```

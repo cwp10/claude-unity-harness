@@ -18,22 +18,27 @@ keywords: [session, context, progress, resume]
 
 ## 세션 시작 루틴 (공식 하네스 패턴)
 
-### 1단계: 현재 위치 확인
+### 1단계: 절대 경로 확보 + 현재 위치 확인
+
 ```bash
-pwd
+git rev-parse --show-toplevel 2>/dev/null || pwd
 ```
+
+출력된 경로를 `PROJECT_ROOT` 로 기억한다.
+이후 모든 파일 읽기는 절대 경로를 사용한다:
+`<PROJECT_ROOT>/.claude/project-memory.json` 등
 
 ### 2단계: project-memory.json 읽기 (우선)
 
-`.claude/project-memory.json` Read (있으면 — 가장 구조화된 컨텍스트).
+`<PROJECT_ROOT>/.claude/project-memory.json` Read (있으면 — 가장 구조화된 컨텍스트).
 
-없으면 → `.claude/claude-progress.txt` Read.
+없으면 → `<PROJECT_ROOT>/.claude/claude-progress.txt` Read.
 
 둘 다 없으면 → "/setup 으로 프로젝트를 초기화하세요." 출력 후 종료.
 
 ### 3단계: .claude/feature_list.json 읽기
 
-`.claude/feature_list.json` 파일 Read (있으면).
+`<PROJECT_ROOT>/.claude/feature_list.json` 파일 Read (있으면).
 passes: false 인 항목 수와 다음 작업할 기능 확인.
 
 ### 4단계: git 이력 확인
