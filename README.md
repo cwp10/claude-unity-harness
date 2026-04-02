@@ -85,7 +85,7 @@ claude-unity-harness/
 │   ├── doc-writer           문서 작성
 │   ├── debugger             버그 진단 (using 누락 자동 검증 포함)
 │   ├── critic               대안 제시 · 성능 최적화 관점
-│   └── verifier             최종 스펙 검증 · passes:true 판정
+│   └── verifier             최종 스펙 검증 · using 누락 grep · passes:true 판정
 │
 ├── hooks/
 │   ├── pre-commit           git commit 시 자동 실행 — .meta 체크·컴파일 검증·코드 리뷰·문서화
@@ -370,7 +370,7 @@ Unity 프로젝트 루트에서 최초 1회 실행합니다.
 - `codebase-explorer`가 인터페이스·부모 클래스·역참조 탐색 (병렬)
 - `unity-reviewer`가 독립 평가자 관점으로 리뷰:
   - 성능: `Update()` 안의 `GetComponent`·`new`·LINQ
-  - Unity 규칙: public 필드 노출, Resources.Load, 구형 Input, 이벤트 해제 누락
+  - Unity 규칙: **`using` 누락 (🔴 Critical)**, public 필드 노출, Resources.Load, 구형 Input, 이벤트 해제 누락
   - 아키텍처: SRP 위반, 싱글턴 남용, 강한 결합
   - 안전성: null 참조, 씬 전환 참조 유실, CancellationToken 미전달
 
