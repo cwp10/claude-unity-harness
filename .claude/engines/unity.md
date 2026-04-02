@@ -85,6 +85,22 @@ public class PlayerController : MonoBehaviour
 
 ---
 
+## using 지시문 필수 체크 (코드 작성·수정 시 항상 확인)
+
+**.cs 파일을 새로 만들거나 수정한 후, 아래 순서로 using 누락을 반드시 점검한다.**
+
+1. 작성한 코드에서 사용한 **모든 타입**을 훑는다
+2. 각 타입이 어느 네임스페이스 소속인지 확인한다
+3. 파일 상단 `using` 목록과 대조한다
+4. 누락된 네임스페이스가 있으면 파일 상단에 즉시 추가한다
+
+> 타입의 네임스페이스를 확실히 모를 경우, 추측하지 말고 해당 타입이 정의된 파일을 Grep으로 찾아 확인한다.
+> ```bash
+> grep -rn "class 타입명\|struct 타입명\|enum 타입명\|interface 타입명" Assets/ --include="*.cs"
+> ```
+
+---
+
 ## 절대 금지
 
 - `Update()`에서 `GetComponent()` 호출 → Awake에서 캐싱

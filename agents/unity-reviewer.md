@@ -64,6 +64,7 @@ avoidWhen: 버그 수정, 새 기능 구현, 코드 직접 수정 요청. 파일
 ### 2. Unity 규칙
 | 체크 항목 | 심각도 |
 |----------|--------|
+| `using` 지시문 누락 — 사용하는 타입의 네임스페이스가 파일 상단에 없음 (CS0246·CS0103 유발) | 🔴 |
 | public 필드 직접 노출 (SerializeField 미사용) | 🟡 |
 | Magic number (의미 없는 숫자 리터럴) | 🟡 |
 | Resources.Load() 사용 → Addressables 대체 필요 | 🟡 |
