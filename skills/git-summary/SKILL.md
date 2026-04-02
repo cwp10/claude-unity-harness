@@ -30,9 +30,9 @@ git rev-parse --show-prefix     # 현재 위치가 루트에서 얼마나 하위
 - 이후 모든 `git add`, `git commit` 명령은 반드시 git 루트에서 실행한다
 - 파일 경로는 git 루트 기준 상대경로를 사용한다
 
-> 예시: 현재 위치 `D:/Projects/googoo-rise/idle-rpg-game/`
-> git 루트 `D:/Projects/googoo-rise/`
-> git add 시: `cd D:/Projects/googoo-rise && git add idle-rpg-game/Assets/...`
+> 예시: 현재 위치 `/Projects/my-game/my-module/`
+> git 루트 `/Projects/my-game/`
+> git add 시: `cd /Projects/my-game && git add my-module/Assets/...`
 
 ---
 
