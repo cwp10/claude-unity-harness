@@ -84,7 +84,15 @@ claude-unity-harness/
 │   └── verifier             최종 스펙 검증 · passes:true 판정
 │
 ├── hooks/
-│   └── pre-commit           git commit 시 자동 실행
+│   ├── pre-commit           git commit 시 자동 실행 — .meta 체크·컴파일 검증·코드 리뷰·문서화
+│   └── hooks.json           Claude Code 훅 설정
+│       ├── SessionStart     세션 시작 시 컨텍스트 자동 주입
+│       ├── UserPromptSubmit 컨텍스트 누락 시 자동 보완
+│       ├── PreToolUse       .cs 수정 전 Unity 규칙 안내
+│       ├── PostToolUse      .cs 저장 후 MCP 연결 시 컴파일 에러 자동 확인 (5초 쿨다운)
+│       ├── PreCompact       컨텍스트 압축 전 진행 상황 자동 저장
+│       ├── SessionEnd       세션 종료 시 진행 이력 기록
+│       └── Stop             세션 메모리 타임스탬프 갱신
 │
 ├── rules/
 │   ├── response.md          소통 언어 · 응답 원칙 · 금지 사항
