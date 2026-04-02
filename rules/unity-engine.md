@@ -6,7 +6,7 @@ paths:
 # Unity 스크립트 규칙
 
 ## 버전 기준
-- Unity 6 LTS (6000.0.x) / C# 9.0 / .NET Standard 2.1
+- Unity 6 LTS (6000.0.x) / C# 10 / .NET Standard 2.1
 - Render Pipeline: 프로젝트별 오버라이드 (기본 URP)
 
 ---

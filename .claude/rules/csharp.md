@@ -26,8 +26,10 @@ paths:
 | 파라미터·로컬 변수 | camelCase | `damageAmount` |
 | bool 변수 | 동사 접두사 | `isDead`, `isWalking` |
 | 이벤트 (발생 전/후) | 현재진행형 / 과거분사 | `OpeningDoor` / `DoorOpened` |
+| 이벤트 핸들러 (관찰자) | `주체이름_이벤트이름` | `GameEvents_DoorOpened` |
 
 > Unity 필드 접두사 (`m_`, `k_`, `s_`) 규칙은 unity-engine.md 참조
+> 포맷·중괄호·열거형 상세는 `.claude/rules/csharp/formatting.md` 참조
 
 ---
 

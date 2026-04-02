@@ -19,7 +19,15 @@ private IEnumerator LoadSceneCoroutine(string sceneName)
 ```
 
 > `Task.Delay` 사용 금지 → `Awaitable.WaitForSecondsAsync` 대체 (Unity 6).
-> CancellationToken 미전달 시 씬 전환 후 계속 실행됨 — Warning.
+> CancellationToken 미전달 시 씬 전환 후에도 계속 실행됨 — 반드시 전달할 것.
+
+씬 전환 시 CancellationToken 취소 패턴:
+```csharp
+private CancellationTokenSource m_cts;
+
+private void OnEnable()  { m_cts = new CancellationTokenSource(); }
+private void OnDisable() { m_cts.Cancel(); m_cts.Dispose(); }
+```
 
 ---
 

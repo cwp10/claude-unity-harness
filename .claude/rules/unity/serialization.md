@@ -19,6 +19,7 @@ public class PlayerController : MonoBehaviour { }
 [SerializeField] private float m_health = 100f;
 
 // 관련 데이터 그룹화 — Serializable 중첩 클래스
+// [Serializable] 데이터 클래스는 public 필드 허용 (Inspector 직렬화 목적 — m_ 접두사 예외)
 [Serializable]
 public class AttackData
 {

@@ -1,6 +1,6 @@
 ---
 paths:
-  - "Assets/**"
+  - "Assets/**/*.cs"
 ---
 
 # Unity 도메인 패턴
@@ -40,7 +40,6 @@ paths:
 
 ## 입력 (New Input System)
 - `InputActionAsset` 기반 / 입력 전담 클래스 분리 (`PlayerInputHandler`)
-- 구형 `Input.GetKey()` 혼용 금지
 
 ---
 

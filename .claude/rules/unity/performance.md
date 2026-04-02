@@ -3,6 +3,7 @@
 ## 성능 기준 (모바일)
 - Draw Call: 100 이하 / GC Alloc per frame: 0 목표 / 프레임 예산: 16.6ms (60fps)
 - 텍스처: ASTC 압축, Atlas 사용 / 반복 생성 객체: ObjectPool 필수
+- 런타임 루프(Update 등) 안에서 LINQ 사용 금지 — GC Alloc 유발 (🟡 Warning)
 
 ---
 
