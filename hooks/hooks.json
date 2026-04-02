@@ -8,7 +8,7 @@
             "type": "command",
             "command": "mkdir -p .claude; if [ -f .claude/project-memory.json ]; then echo '=== [claude-unity-harness] 프로젝트 메모리 ===' && cat .claude/project-memory.json; fi; if [ -f .claude/claude-progress.txt ]; then echo '=== [claude-unity-harness] 세션 진행 ===' && cat .claude/claude-progress.txt; fi; if [ -f .claude/feature_list.json ]; then echo '=== [claude-unity-harness] 기능 목록 ===' && cat .claude/feature_list.json; fi; touch .claude/.context_loaded || true",
             "timeout": 10
-          },
+          }
         ]
       }
     ],
