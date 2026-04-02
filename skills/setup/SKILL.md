@@ -141,7 +141,7 @@ CLAUDE.md의 `@engines/unity.md` 등 @-reference가 올바르게 해결되려면
 ```bash
 PLUGIN_ROOT=$(find "$HOME/.claude/plugins/cache" \
   -path "*/claude-unity-harness/*" -name "plugin.json" 2>/dev/null \
-  | sort -V | tail -1 | xargs dirname 2>/dev/null)
+  | sort -V | tail -1 | xargs -I{} dirname {} | xargs -I{} dirname {} 2>/dev/null)
 
 if [ -n "$PLUGIN_ROOT" ] && [ -d "$PLUGIN_ROOT" ]; then
   mkdir -p .claude/engines .claude/languages .claude/domains
