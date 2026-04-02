@@ -11,9 +11,9 @@
           },
           {
             "type": "agent",
-            "model": "haiku",
+            "model": "claude-haiku-4-5-20251001",
             "prompt": "시스템 컨텍스트의 '[claude-unity-harness] 프로젝트 메모리' 내용을 확인하세요.\n\ncurrentFeature 값이 비어있으면 아무것도 출력하지 않고 종료.\n\n값이 있으면 아래 형식으로만 출력:\n\n## 세션 복구 완료 ✅\n**작업 중:** (currentFeature) — (phase)\n**다음 작업:** (nextUp)\n**최근 커밋:** (Bash: git log --oneline -3 2>/dev/null)\n\n어떤 작업을 진행할까요?",
-            "timeout": 30
+            "timeout": 60
           }
         ]
       }
