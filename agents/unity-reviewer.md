@@ -54,7 +54,7 @@ avoidWhen: 버그 수정, 새 기능 구현, 코드 직접 수정 요청. 파일
 | 체크 항목 | 심각도 |
 |----------|--------|
 | Update()·FixedUpdate()·LateUpdate() 안에서 GetComponent() 호출 | 🔴 |
-| Update() 안에서 FindObjectOfType() / FindObjectsOfType() | 🔴 |
+| Update() 안에서 Find* 계열 호출 (FindObjectOfType / FindObjectsOfType / FindAnyObjectByType / FindObjectsByType) | 🔴 |
 | 매 프레임 new 키워드 → GC Alloc 유발 | 🔴 |
 | 런타임 루프 안에서 LINQ 사용 | 🟡 |
 | 런타임 루프 안에서 string 연결 (+, string.Format) → StringBuilder 제안 | 🟡 |
@@ -69,7 +69,9 @@ avoidWhen: 버그 수정, 새 기능 구현, 코드 직접 수정 요청. 파일
 | Magic number (의미 없는 숫자 리터럴) | 🟡 |
 | Resources.Load() 사용 → Addressables 대체 필요 | 🟡 |
 | 구형 Input.GetKey() / Input.GetAxis() → New Input System 대체 | 🟡 |
-| Coroutine 사용 → UniTask 대체 가능 여부 | 🟢 |
+| FindObjectOfType() / FindObjectsOfType() 사용 → FindAnyObjectByType\<T\>() / FindObjectsByType\<T\>() 대체 (Unity 6 deprecated) | 🟡 |
+| renderer.material Update()에서 반복 접근 → Awake()에서 캐싱 (매 접근마다 인스턴스 생성) | 🟡 |
+| Task.Delay 사용 → Awaitable.WaitForSecondsAsync() 대체 권장 (Unity 6, 메인 스레드 유지) | 🟡 |
 | OnDisable / OnDestroy 에서 이벤트 구독 해제 누락 | 🔴 |
 | Start() 대신 Awake() 에서 캐싱해야 할 항목 | 🟢 |
 

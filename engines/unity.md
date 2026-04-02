@@ -46,7 +46,7 @@ private const float k_GravityScale = 9.8f;
 ## MonoBehaviour 생명주기 순서
 
 ```
-Awake → OnEnable → Start → Update → LateUpdate → FixedUpdate
+Awake → OnEnable → Start → FixedUpdate → Update → LateUpdate
 OnDisable → OnDestroy
 ```
 
@@ -85,15 +85,46 @@ public class PlayerController : MonoBehaviour
 
 ---
 
+## using 지시문 필수 체크 (코드 작성·수정 시 항상 확인)
+
+**.cs 파일을 새로 만들거나 수정한 후, 아래 순서로 using 누락을 반드시 점검한다.**
+
+1. 작성한 코드에서 사용한 **모든 타입**을 훑는다
+2. 각 타입이 어느 네임스페이스 소속인지 확인한다
+3. 파일 상단 `using` 목록과 대조한다
+4. 누락된 네임스페이스가 있으면 파일 상단에 즉시 추가한다
+
+> 타입의 네임스페이스를 확실히 모를 경우, 추측하지 말고 해당 타입이 정의된 파일을 Grep으로 찾아 확인한다.
+> ```bash
+> grep -rn "class 타입명\|struct 타입명\|enum 타입명\|interface 타입명" Assets/ --include="*.cs"
+> ```
+
+---
+
 ## 절대 금지
 
 - `Update()`에서 `GetComponent()` 호출 → Awake에서 캐싱
-- `FindObjectOfType()` / `FindObjectsOfType()` 남용
-- `Resources.Load()` → Addressables 사용
+- `FindObjectOfType()` / `FindObjectsOfType()` 사용 → `FindAnyObjectByType<T>()` / `FindObjectsByType<T>()` 로 대체 (Unity 6 필수)
 - `Update()`에서 `new` 키워드 → GC Alloc 유발
+- `Update()`에서 문자열 연산 (`+` 연결) → `StringBuilder` 사용
+- `renderer.material` Update()에서 반복 접근 금지 → Awake()에서 캐싱 (`sharedMaterial`은 읽기 전용·전체 공유 변경 시만 사용)
 - `public` 필드 직접 노출 → `[SerializeField] private` 사용
 - 구형 `Input.GetKey()` → New Input System 사용
 - `OnDisable/OnDestroy`에서 이벤트 구독 해제 누락
+
+---
+
+## [RequireComponent] — 컴포넌트 의존성 명시
+
+```csharp
+// 컴포넌트 의존성을 코드로 보장 — Inspector에서 실수 방지
+[RequireComponent(typeof(Rigidbody))]
+[RequireComponent(typeof(Animator))]
+public class PlayerController : MonoBehaviour
+{
+    // Awake에서 GetComponent 안전하게 호출 가능
+}
+```
 
 ---
 
@@ -142,6 +173,20 @@ private void Awake()
 }
 ```
 
+### TryGetComponent (Unity 6 권장)
+
+```csharp
+// ❌ GetComponent + null 체크 — 레퍼런스 타입에서 GC 발생
+Rigidbody rb = GetComponent<Rigidbody>();
+if (rb != null) { rb.AddForce(Vector3.up); }
+
+// ✅ TryGetComponent — GC 없음
+if (TryGetComponent<Rigidbody>(out var rb))
+{
+    rb.AddForce(Vector3.up);
+}
+```
+
 ---
 
 ## 이벤트 구독/해제 패턴
@@ -164,19 +209,25 @@ private void OnDisable()
 
 ---
 
-## 비동기 처리 (UniTask)
+## 비동기 처리 (Coroutine / async-await)
 
 ```csharp
-// Coroutine 대신 UniTask 사용
-public async UniTask LoadSceneAsync(string sceneName, CancellationToken ct)
+// 씬 로드 — Coroutine
+private IEnumerator LoadSceneCoroutine(string sceneName)
 {
-    await SceneManager.LoadSceneAsync(sceneName)
-        .ToUniTask(cancellationToken: ct);
+    AsyncOperation op = SceneManager.LoadSceneAsync(sceneName);
+    while (!op.isDone)
+    {
+        yield return null;
+    }
 }
 
-private CancellationTokenSource m_cts;
-private void OnEnable()  => m_cts = new CancellationTokenSource();
-private void OnDisable() { m_cts?.Cancel(); m_cts?.Dispose(); }
+// 짧은 대기 — Awaitable (Unity 6 권장, 메인 스레드 유지)
+public async Awaitable DelayedAction(float seconds, CancellationToken ct)
+{
+    await Awaitable.WaitForSecondsAsync(seconds, ct);
+    Execute();
+}
 ```
 
 ---
@@ -196,11 +247,44 @@ private void OnDisable() { m_cts?.Cancel(); m_cts?.Dispose(); }
 ---
 
 ## 사용 패키지 기준
-- 비동기: UniTask (Coroutine 사용 금지)
-- 에셋 관리: Addressables (Resources.Load 금지)
-- 트위닝: DOTween Pro
+- 비동기: Coroutine 또는 async-await (프로젝트별 선택)
+- 에셋 관리: Addressables
 - 카메라: Cinemachine
 - 입력: Input System (New)
+
+---
+
+## 오브젝트 풀링 (UnityEngine.Pool)
+
+반복 생성·삭제 오브젝트는 `ObjectPool<T>` 필수 (Unity 6 내장).
+
+```csharp
+using UnityEngine.Pool;
+
+public class BulletSpawner : MonoBehaviour
+{
+    [SerializeField] private Bullet m_bulletPrefab;
+    private ObjectPool<Bullet> m_pool;
+
+    private void Awake()
+    {
+        m_pool = new ObjectPool<Bullet>(
+            createFunc:      () => Instantiate(m_bulletPrefab),
+            actionOnGet:     b  => b.gameObject.SetActive(true),
+            actionOnRelease: b  => b.gameObject.SetActive(false),
+            actionOnDestroy: b  => Destroy(b.gameObject),
+            defaultCapacity: 10,
+            maxSize: 50
+        );
+    }
+
+    public void Fire()
+    {
+        Bullet bullet = m_pool.Get();
+        bullet.Init(m_pool); // 풀 참조 전달 → 자기 반환용
+    }
+}
+```
 
 ---
 
