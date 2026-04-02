@@ -19,6 +19,23 @@ keywords: [git, commit, summary, changelog, diff]
 
 다음 순서로 실행한다:
 
+## 0단계: git 루트 확인 (필수)
+
+```bash
+git rev-parse --show-toplevel   # git 루트 절대 경로
+git rev-parse --show-prefix     # 현재 위치가 루트에서 얼마나 하위인지 확인
+```
+
+**현재 위치가 git 루트와 다를 경우 (show-prefix 결과가 비어있지 않으면):**
+- 이후 모든 `git add`, `git commit` 명령은 반드시 git 루트에서 실행한다
+- 파일 경로는 git 루트 기준 상대경로를 사용한다
+
+> 예시: 현재 위치 `D:/Projects/googoo-rise/idle-rpg-game/`
+> git 루트 `D:/Projects/googoo-rise/`
+> git add 시: `cd D:/Projects/googoo-rise && git add idle-rpg-game/Assets/...`
+
+---
+
 ## 1단계: 변경사항 분석
 
 1. `git status` 로 현재 변경 파일 목록 확인

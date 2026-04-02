@@ -88,7 +88,7 @@ claude-unity-harness/
 │   └── verifier             최종 스펙 검증 · using 누락 grep · passes:true 판정
 │
 ├── hooks/
-│   ├── pre-commit           git commit 시 자동 실행 — .meta 체크·컴파일 검증·코드 리뷰·문서화
+│   ├── pre-commit           git commit 시 자동 실행 — [1/2] .meta 체크 · [2/2] 컴파일 검증
 │   └── hooks.json           Claude Code 훅 설정
 │       ├── SessionStart     세션 시작 시 컨텍스트 자동 주입
 │       ├── UserPromptSubmit 컨텍스트 누락 시 자동 보완
@@ -447,6 +447,7 @@ Unity 프로젝트 루트에서 최초 1회 실행합니다.
 - 변경 파일을 논리적 단위로 분리
 - 커밋 타입 자동 선택 + 메시지 제안
 - 민감 정보·`.meta` 누락 주의사항 포함
+- **git 루트 자동 감지**: 하위 디렉토리에서 실행해도 git 루트 기준으로 경로 자동 조정 (Error 128 방지)
 - **커밋 전 컴파일 에러 자동 확인** (MCP 연결 시):
   - 에러 있음 → 커밋 차단 + 에러 목록 출력
   - 에러 없음 → 커밋 진행

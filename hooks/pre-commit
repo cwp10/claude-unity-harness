@@ -1,17 +1,15 @@
 #!/bin/sh
 # ============================================================
-# Claude Code 코드 리뷰 + 자동 문서화 pre-commit hook (Unity 전용)
+# Claude Code pre-commit hook (Unity 전용)
 # Windows (Git Bash) / macOS 크로스 플랫폼 지원
 #
 # 흐름:
 #   1. .meta 누락 파일 감지 → 자동 git add
 #      여전히 누락 있으면 커밋 차단 (에디터에서 저장 필요)
-#   2. Unity -batchmode 컴파일 검증
-#      ProjectVersion.txt 에서 버전 읽어 Unity.exe 경로 자동 구성
+#   2. Unity 컴파일 검증 (MCP 우선 → batchmode fallback)
 #      실패 시 커밋 차단
-#   3. 변경 .cs 파일 커밋 단위 일괄 리뷰
-#   4. Critical 있으면 커밋 차단
-#   5. Critical 없으면 기능 단위 문서 자동 생성/업데이트
+#
+# 리뷰·문서화는 /git-summary, /review 스킬로 커밋 전에 실행하세요.
 #
 # 설치: /setup 실행 시 자동 설치
 #   또는 PowerShell에서 (프로젝트 루트에서 실행):
@@ -22,7 +20,6 @@ RED='\033[0;31m'
 YELLOW='\033[1;33m'
 GREEN='\033[0;32m'
 CYAN='\033[0;36m'
-BLUE='\033[0;34m'
 NC='\033[0m'
 
 # ── MCP 연결 확인 함수 ────────────────────────────────────
@@ -39,7 +36,7 @@ check_mcp_connected() {
     return 1
 }
 
-# ── claude CLI 확인 ────────────────────────────────────────
+# ── claude CLI 확인 (컴파일 MCP 체크용) ───────────────────
 CLAUDE_CMD=""
 if command -v claude > /dev/null 2>&1; then
     CLAUDE_CMD="claude"
@@ -53,23 +50,22 @@ git rev-parse --verify HEAD > /dev/null 2>&1 || IS_INITIAL_COMMIT=true
 
 # ── 변경된 .cs 파일 확인 ────────────────────────────────────
 if [ "$IS_INITIAL_COMMIT" = true ]; then
-    # 첫 커밋: HEAD 없음 → 스테이징된 전체 파일 사용
     CHANGED_CS=$(git ls-files --cached 2>/dev/null | grep '\.cs$' || true)
 else
     CHANGED_CS=$(git diff --cached --name-only --diff-filter=ACM 2>/dev/null | grep '\.cs$' || true)
 fi
 
 if [ -z "$CHANGED_CS" ]; then
-    printf "${GREEN}리뷰 대상 파일 없음 (.cs 파일 변경 없음).${NC}\n\n"
+    printf "${GREEN}.cs 파일 변경 없음 — 검사 생략.${NC}\n\n"
     exit 0
 fi
 
 # ============================================================
-# STEP 0: .meta 파일 처리
+# STEP 1/2: .meta 파일 처리
 # ============================================================
 printf "\n"
 printf "${CYAN}━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━${NC}\n"
-printf "${CYAN}  [0/3] .meta 파일 확인${NC}\n"
+printf "${CYAN}  [1/2] .meta 파일 확인${NC}\n"
 printf "${CYAN}━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━${NC}\n\n"
 
 if [ "$IS_INITIAL_COMMIT" = true ]; then
@@ -129,16 +125,16 @@ fi
 printf "${GREEN}  .meta 파일 확인 완료.${NC}\n\n"
 
 # ============================================================
-# STEP 1: Unity 컴파일 검증 (MCP 우선 → batchmode fallback)
+# STEP 2/2: Unity 컴파일 검증 (MCP 우선 → batchmode fallback)
 # ============================================================
 printf "${CYAN}━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━${NC}\n"
-printf "${CYAN}  [1/3] Unity 컴파일 검증${NC}\n"
+printf "${CYAN}  [2/2] Unity 컴파일 검증${NC}\n"
 printf "${CYAN}━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━${NC}\n\n"
 
 COMPILE_CHECKED=false
 VERSION_FILE="ProjectSettings/ProjectVersion.txt"
 
-# ── 1A: MCP 컴파일 확인 (Unity Editor 실행 중일 때) ──────────
+# ── 2A: MCP 컴파일 확인 (Unity Editor 실행 중일 때) ──────────
 if [ -n "$CLAUDE_CMD" ] && check_mcp_connected; then
     printf "  ${CYAN}Unity MCP 연결됨 → read_console로 컴파일 확인 중...${NC}\n\n"
 
@@ -163,11 +159,11 @@ if [ -n "$CLAUDE_CMD" ] && check_mcp_connected; then
         printf "    git commit --no-verify\n\n"
         exit 1
     else
-        printf "  ${YELLOW}MCP 결과 불명확 → batchmode로 재확인합니다.${NC}\n\n"
+        printf "  ${YELLOW}MCP 응답 불명확 → batchmode로 재확인합니다.${NC}\n\n"
     fi
 fi
 
-# ── 1B: batchmode fallback (MCP 미연결 또는 결과 불명확) ─────
+# ── 2B: batchmode fallback (MCP 미연결 또는 응답 불명확) ─────
 if [ "$COMPILE_CHECKED" = false ]; then
     UNITY_VERSION=""
     UNITY_EXE=""
@@ -176,7 +172,6 @@ if [ "$COMPILE_CHECKED" = false ]; then
         UNITY_VERSION=$(grep "m_EditorVersion:" "$VERSION_FILE" | awk '{print $2}' | tr -d '\r')
         printf "  Unity 버전: %s\n" "$UNITY_VERSION"
 
-        # 1순위: .claude/CLAUDE.md 에서 UNITY_PATH 읽기
         if [ -f ".claude/CLAUDE.md" ]; then
             CUSTOM_PATH=$(grep "UNITY_PATH:" ".claude/CLAUDE.md" | sed 's/.*UNITY_PATH: *//' | tr -d '\r')
             if [ -n "$CUSTOM_PATH" ]; then
@@ -185,7 +180,6 @@ if [ "$COMPILE_CHECKED" = false ]; then
             fi
         fi
 
-        # 2순위: 기본 Hub 설치 경로 탐색 — 정확한 버전 매칭 (Windows / macOS)
         if [ -z "$UNITY_EXE" ] || [ ! -f "$UNITY_EXE" ]; then
             UNITY_EXE=""
             UNITY_EXE_C="/c/Program Files/Unity/Hub/Editor/${UNITY_VERSION}/Editor/Unity.exe"
@@ -200,7 +194,6 @@ if [ "$COMPILE_CHECKED" = false ]; then
             fi
         fi
 
-        # 3순위: Hub 디렉토리 글로빙 폴백 — 버전 불일치 시 설치된 임의 버전 사용
         if [ -z "$UNITY_EXE" ] || [ ! -f "$UNITY_EXE" ]; then
             UNITY_EXE=""
             for HUB_DIR in \
@@ -225,7 +218,6 @@ if [ "$COMPILE_CHECKED" = false ]; then
         fi
     fi
 
-    # ── 컴파일 타임아웃 읽기 (CLAUDE.md UNITY_COMPILE_TIMEOUT: N, 기본 120초) ──
     COMPILE_TIMEOUT=120
     if [ -f ".claude/CLAUDE.md" ]; then
         CUSTOM_TIMEOUT=$(grep "UNITY_COMPILE_TIMEOUT:" ".claude/CLAUDE.md" \
@@ -234,11 +226,11 @@ if [ "$COMPILE_CHECKED" = false ]; then
     fi
 
     if [ -z "$UNITY_VERSION" ]; then
-        printf "  ${YELLOW}ProjectSettings/ProjectVersion.txt 없음. 컴파일 검증 생략.${NC}\n\n"
+        printf "  ${YELLOW}ProjectSettings/ProjectVersion.txt 없음 — 컴파일 검증 생략.${NC}\n\n"
     elif [ -z "$UNITY_EXE" ] || [ ! -f "$UNITY_EXE" ]; then
-        printf "  ${YELLOW}Unity.exe 경로를 찾을 수 없습니다. 컴파일 검증 생략.${NC}\n"
+        printf "  ${YELLOW}Unity.exe 경로를 찾을 수 없습니다 — 컴파일 검증 생략.${NC}\n"
         printf "  커스텀 경로 설정: .claude/CLAUDE.md 에 아래 줄 추가\n"
-        printf "    UNITY_PATH: C:/Program Files/Unity/Hub/Editor/%s/Editor/Unity.exe\n"  "$UNITY_VERSION"
+        printf "    UNITY_PATH: C:/Program Files/Unity/Hub/Editor/%s/Editor/Unity.exe\n" "$UNITY_VERSION"
         printf "  타임아웃 설정 (기본 120초): UNITY_COMPILE_TIMEOUT: 180\n\n"
     else
         printf "  Unity.exe: %s\n" "$UNITY_EXE"
@@ -286,209 +278,6 @@ if [ "$COMPILE_CHECKED" = false ]; then
         rm -f "$COMPILE_LOG"
         printf "\n"
     fi
-fi
-
-# ============================================================
-# STEP 2: 코드 리뷰 (커밋 단위 일괄)
-# ============================================================
-FILE_COUNT=$(echo "$CHANGED_CS" | wc -l | tr -d ' ')
-
-printf "${CYAN}━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━${NC}\n"
-printf "${CYAN}  [2/3] 코드 리뷰 (Unity C# · 커밋 단위 일괄 · %d개 파일)${NC}\n" "$FILE_COUNT"
-printf "${CYAN}━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━${NC}\n\n"
-
-printf "대상 파일:\n"
-echo "$CHANGED_CS" | while IFS= read -r f; do
-    printf "  * %s\n" "$f"
-done
-printf "\n"
-
-REVIEW_OUTPUT=""
-CRITICAL_COUNT=0
-REVIEW_FILE=""
-
-if [ -z "$CLAUDE_CMD" ]; then
-    printf "${YELLOW}claude CLI 없음. 리뷰 생략.${NC}\n"
-    printf "  설치: npm install -g @anthropic-ai/claude-code\n\n"
-else
-    printf "  커밋 전체를 하나의 단위로 리뷰합니다...\n\n"
-
-    REVIEW_OUTPUT=$($CLAUDE_CMD -p --bare \
-"이번 커밋에서 변경된 Unity C# 파일들을 커밋 단위로 일괄 리뷰해줘.
-
-변경 파일 목록:
-$CHANGED_CS
-
-리뷰 관점:
-1. 각 파일의 성능·Unity 규칙·아키텍처·안전성 이슈
-2. 파일 간 연관성 — 인터페이스 불일치, 의존성 방향, 이벤트 구독/해제 누락
-3. 커밋 전체 일관성 — 네이밍·패턴이 기존 코드와 일관되는지
-
-이슈 분류:
-- [Critical] 빌드 실패·크래시·메모리 릭·데이터 손실
-- [Warning]  성능 저하·Unity 규칙 위반·잠재 버그
-- [Suggestion] 가독성·구조 개선
-
-출력 형식:
-## 리뷰 요약
-커밋 전체 평가 한 줄
-
-## 파일별 이슈
-### 파일명
-이슈 목록 (없으면 '이슈 없음')
-
-## 파일 간 연관성 이슈
-(있으면 작성, 없으면 생략)
-
-## 우선 수정 순서
-Critical 이슈가 있을 때만 작성" \
-        2>/dev/null) || {
-        printf "  ${YELLOW}리뷰 실패. 건너뜁니다.${NC}\n\n"
-        REVIEW_OUTPUT=""
-    }
-
-    if [ -n "$REVIEW_OUTPUT" ]; then
-        CRITICAL_COUNT=$(echo "$REVIEW_OUTPUT" | grep -c "\[Critical\]" || true)
-
-        REVIEW_DIR="docs/analysis"
-        mkdir -p "$REVIEW_DIR"
-        REVIEW_FILE="${REVIEW_DIR}/review_$(date -u +%Y%m%d_%H%M%S).md"
-        printf "# 커밋 전 코드 리뷰\n날짜: %s\n파일 수: %d\n\n%s\n" \
-            "$(date -u '+%Y-%m-%d %H:%M:%S') UTC" "$FILE_COUNT" \
-            "$REVIEW_OUTPUT" > "$REVIEW_FILE"
-
-        printf "%s\n\n" "$REVIEW_OUTPUT"
-        printf "  리뷰 저장: %s\n\n" "$REVIEW_FILE"
-    fi
-fi
-
-# ── Critical 있으면 커밋 차단 ─────────────────────────────
-if [ "$CRITICAL_COUNT" -gt 0 ]; then
-    printf "${RED}━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━${NC}\n"
-    printf "${RED}  커밋 차단: Critical 이슈 %d건 발견${NC}\n" "$CRITICAL_COUNT"
-    printf "${RED}━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━${NC}\n\n"
-    printf "  수정 후 다시 커밋하세요.\n"
-    [ -n "$REVIEW_FILE" ] && printf "  리뷰 내용: %s\n" "$REVIEW_FILE"
-    printf "\n  긴급 시 강제 커밋 (리뷰·문서화 생략):\n"
-    printf "    git commit --no-verify\n\n"
-    exit 1
-fi
-
-printf "${GREEN}  Critical 이슈 없음.${NC}\n\n"
-
-# ============================================================
-# STEP 3: 문서 자동화
-# ============================================================
-printf "${CYAN}━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━${NC}\n"
-printf "${CYAN}  [3/3] 문서 자동화${NC}\n"
-printf "${CYAN}━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━${NC}\n\n"
-
-if [ -z "$CLAUDE_CMD" ]; then
-    printf "${YELLOW}claude CLI 없음. 문서화 생략.${NC}\n\n"
-else
-    mkdir -p "docs/analysis"
-    COMMIT_DATE=$(date -u '+%Y-%m-%d')
-    PROCESSED_DIRS=""
-
-    while IFS= read -r FILE; do
-        [ -f "$FILE" ] || continue
-
-        FILE_DIR=$(dirname "$FILE")
-
-        case "$PROCESSED_DIRS" in
-            *"|${FILE_DIR}|"*) continue ;;
-        esac
-        PROCESSED_DIRS="${PROCESSED_DIRS}|${FILE_DIR}|"
-
-        printf "  문서화 중: %s/\n" "$FILE_DIR"
-
-        DIR_FILES=$(echo "$CHANGED_CS" | grep "^${FILE_DIR}/" || echo "$FILE")
-        EXISTING_DOCS=$(ls docs/analysis/ 2>/dev/null | head -10 || echo "없음")
-        SIMILAR_DOC=$(ls docs/analysis/ 2>/dev/null | \
-            grep -i "$(basename "$FILE_DIR")" | head -1 || echo "없음")
-
-        EXISTING_CREATED=""
-        EXISTING_HISTORY=""
-        DOC_PATH_CANDIDATE=""
-
-        if [ "$SIMILAR_DOC" != "없음" ]; then
-            DOC_PATH_CANDIDATE="docs/analysis/${SIMILAR_DOC}"
-        fi
-
-        if [ -f "$DOC_PATH_CANDIDATE" ]; then
-            EXISTING_CREATED=$(grep "^작성일:" "$DOC_PATH_CANDIDATE" | head -1 | \
-                sed 's/작성일: //' | tr -d '\r')
-            EXISTING_HISTORY=$(awk '/^## 변경 이력/,0' "$DOC_PATH_CANDIDATE" | \
-                tail -n +2 | head -20)
-        fi
-
-        [ -z "$EXISTING_CREATED" ] && EXISTING_CREATED="$COMMIT_DATE"
-
-        DOC_RESULT=$($CLAUDE_CMD -p --bare \
-"다음 Unity C# 파일들을 분석해서 기능 단위 분석 문서를 작성해줘.
-
-분석 대상 파일: $DIR_FILES
-
-요구사항:
-1. 첫 줄 반드시: FILENAME: 한국어-기능명-분석.md
-   기존 파일 패턴 참고: $EXISTING_DOCS
-   유사 기존 파일: $SIMILAR_DOC
-
-2. 문서 내용 (두 번째 줄부터 마크다운):
-## 개요
-이 기능/시스템이 하는 역할 2~3줄
-
-## 관련 파일
-| 파일 | 클래스 | 역할 |
-|------|--------|------|
-
-## 동작 흐름
-주요 로직 순서
-
-## 설정값 위치
-관련 ScriptableObject 또는 설정 파일
-
-## 주의사항
-개발 시 알아야 할 특이사항
-
-## 변경 이력
-| 날짜 | 변경 내용 |
-|------|---------| 
-| $COMMIT_DATE | 이번 변경 내용 한 줄 요약 |
-${EXISTING_HISTORY}" \
-            2>/dev/null) || {
-            printf "  ${YELLOW}%s 문서화 실패. 건너뜁니다.${NC}\n" "$FILE_DIR"
-            continue
-        }
-
-        DOC_FILENAME=$(echo "$DOC_RESULT" | head -1 | sed 's/FILENAME: //' | tr -d '\r')
-        DOC_CONTENT=$(echo "$DOC_RESULT" | tail -n +2)
-
-        if [ -z "$DOC_FILENAME" ] || [ "$DOC_FILENAME" = "$DOC_RESULT" ]; then
-            printf "  ${YELLOW}파일명 추출 실패. 건너뜁니다.${NC}\n"
-            continue
-        fi
-
-        DOC_PATH="docs/analysis/${DOC_FILENAME}"
-        TITLE=$(echo "$DOC_FILENAME" | sed 's/\.md$//' | sed 's/-/ /g')
-
-        if [ -f "$DOC_PATH" ]; then
-            printf "# %s\n\n작성일: %s\n최종수정: %s\n\n%s\n" \
-                "$TITLE" "$EXISTING_CREATED" "$COMMIT_DATE" "$DOC_CONTENT" > "$DOC_PATH"
-            printf "  ${BLUE}업데이트: %s${NC}\n" "$DOC_PATH"
-        else
-            printf "# %s\n\n작성일: %s\n최종수정: %s\n\n%s\n" \
-                "$TITLE" "$COMMIT_DATE" "$COMMIT_DATE" "$DOC_CONTENT" > "$DOC_PATH"
-            printf "  ${GREEN}생성: %s${NC}\n" "$DOC_PATH"
-        fi
-
-        git add "$DOC_PATH"
-
-    done << EOF
-$CHANGED_CS
-EOF
-
-    printf "\n${GREEN}문서화 완료. 코드와 문서가 함께 커밋됩니다.${NC}\n\n"
 fi
 
 # ============================================================
