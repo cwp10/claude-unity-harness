@@ -42,7 +42,7 @@
           {
             "type": "agent",
             "model": "haiku",
-            "prompt": "1. .claude/.pending_compile_check 파일을 Bash로 확인하세요: `[ -f .claude/.pending_compile_check ] && cat .claude/.pending_compile_check`\n2. 파일이 없으면 즉시 종료 (아무것도 출력하지 않음)\n3. 파일이 있으면:\n   a. mcp__UnityMCP__read_console 툴을 호출해 컴파일 에러를 확인하세요\n   b. Error 레벨 로그만 필터링해서 출력하세요\n   c. 에러 없으면 아무것도 출력하지 않음\n   d. Bash로 플래그 파일 삭제: `rm -f .claude/.pending_compile_check`",
+            "prompt": "1. Bash로 플래그 확인: `[ -f .claude/.pending_compile_check ] && cat .claude/.pending_compile_check`\n2. 파일 없으면 즉시 종료 (아무것도 출력하지 않음)\n3. 파일 있으면:\n   a. 플래그 즉시 삭제: `rm -f .claude/.pending_compile_check` (이후 단계 실패해도 삭제는 완료)\n   b. mcp__UnityMCP__read_console 호출 — 실패(MCP 미연결)하면 조용히 종료\n   c. 결과에 컴파일 진행 중 표시(isCompiling/Compiling)가 있으면: Bash `sleep 3` 후 read_console 재호출 (1회만)\n   d. Error 레벨 로그 있으면 출력\n   e. Error 없으면 아무것도 출력하지 않음",
             "timeout": 30
           }
         ]
