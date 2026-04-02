@@ -98,19 +98,23 @@ claude-unity-harness/
 │       ├── SessionEnd       세션 종료 시 진행 이력 기록
 │       └── Stop             세션 메모리 타임스탬프 갱신
 │
-├── rules/
-│   ├── response.md          소통 언어 · 응답 원칙 · 금지 사항
-│   ├── git.md               브랜치 전략 · 커밋 메시지 컨벤션
-│   └── code-review.md       심각도 기준 (Critical / Warning / Suggestion)
-│
-├── engines/
-│   └── unity.md             Unity 6 LTS 코딩 규칙 · 네이밍 · 생명주기
-│
-├── languages/
-│   └── csharp.md            C# 스타일 가이드 · 포맷 규칙
-│
-└── domains/
-    └── unity.md             Unity 아키텍처 패턴 · UI · 물리 · 씬 관리
+└── rules/                   Claude Code paths frontmatter 조건부 자동 로드
+    ├── response.md          소통 언어 · 응답 원칙 · 금지 사항 (항상 로드)
+    ├── git.md               브랜치 전략 · 커밋 메시지 컨벤션 (항상 로드)
+    ├── code-review.md       심각도 기준 (Critical / Warning / Suggestion) (항상 로드)
+    ├── unity-engine.md      Unity 6 LTS 네이밍 · 생명주기 · 금지 목록 (Assets/**/*.cs)
+    ├── unity-domain.md      아키텍처 패턴 · UI · 물리 · 씬 관리 (Assets/**/*.cs)
+    ├── csharp.md            C# 스타일 가이드 · 개발 원칙 · 코드 스멜 (**/*.cs)
+    ├── unity/               세부 규칙 — 에이전트가 필요 시 명시적 Read
+    │   ├── serialization.md  직렬화 · RequireComponent · 네임스페이스 테이블
+    │   ├── caching.md        컴포넌트 캐싱 · 이벤트 구독/해제 패턴
+    │   ├── async.md          Coroutine · Awaitable · CancellationToken 패턴
+    │   ├── performance.md    성능 기준 · LINQ 금지 · SOLID 원칙
+    │   ├── systems.md        오디오 · 다국어 · 접근성 · 학습 흐름
+    │   └── platform.md       빌드 타겟별 고려사항 · CI/CD
+    └── csharp/              세부 규칙 — 에이전트가 필요 시 명시적 Read
+        ├── formatting.md     Allman 중괄호 · 프로퍼티 · 공백 · 열거형
+        └── patterns.md       주석 규칙 · DRY 패턴
 ```
 
 ---
@@ -605,6 +609,8 @@ verifier 실행 → PASS → 완료 ✅
 
 | 버전 | 주요 변경 |
 |------|----------|
+| v1.0.49 | 규칙 파일 구조 전면 개편 — engines/languages/domains 제거, `.claude/rules/` 통합 (paths frontmatter 조건부 자동 로드). unity-engine.md·unity-domain.md·csharp.md 핵심 파일 70줄 이하 경량화. unity/·csharp/ 서브디렉토리로 세부 규칙 on-demand 분리. C# 버전 10으로 정정. |
+| v1.0.38 | hooks 개선 — SessionStart agent 훅 제거, 안정성 향상 |
 | v1.0.37 | engines/unity.md 오류 수정 — `m_childRenderer` 선언 누락, TryGetComponent 주석 정확화, `OnDestroy` 생명주기 예제 추가, 직렬화 규칙 경량화 |
 | v1.0.36 | unity-reviewer 체크 항목 개선 — `renderer.material` 규칙 수정, `Find*` 계열 혼동 해소, `Task.Delay → Awaitable` 체크 추가 |
 | v1.0.35 | hooks 개선 — Stop 훅 `savedAt` 필드 생성, 컴파일 체크 디바운스 구조 개편 |
