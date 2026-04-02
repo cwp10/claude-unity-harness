@@ -63,6 +63,12 @@
             "type": "command",
             "command": "NOW=$(date -u '+%Y-%m-%d') && PROG=.claude/claude-progress.txt && if [ -f \"$PROG\" ]; then grep -q \"^| $NOW\" \"$PROG\" || printf '| %s | (작업 내용 분석 중...) | 🔄 |\\n' \"$NOW\" >> \"$PROG\"; else printf '# 프로젝트 진행 상황\\n\\n## 세션 이력\\n| 날짜 | 작업 내용 | 완료 여부 |\\n|------|----------|----------|\\n| %s | (작업 내용 분석 중...) | 🔄 |\\n\\n## 현재 진행 상황\\n\\n## 다음 작업\\n\\n## 주요 설계 결정\\n\\n## 알려진 이슈\\n' \"$NOW\" > \"$PROG\"; fi && rm -f .claude/.context_loaded",
             "timeout": 5
+          },
+          {
+            "type": "agent",
+            "model": "haiku",
+            "prompt": "세션이 종료됩니다. .claude/project-memory.json을 현재 세션 기준으로 갱신하세요.\n\n1. .claude/project-memory.json Read\n   없으면 아래 기본 구조로 생성:\n   {\"techStack\":\"\",\"platform\":\"\",\"currentFeature\":\"\",\"phase\":\"대기 중\",\"conventions\":{\"naming\":\"m_(private) k_(const) s_(static)\",\"async\":\"UniTask\",\"assets\":\"Addressables\",\"events\":\"ScriptableObject Event Channel\"},\"decisions\":[],\"blockers\":[],\"nextUp\":\"\",\"progress\":\"\",\"lastUpdated\":\"\"}\n\n2. 현재 대화 내용을 바탕으로 아래 필드만 갱신 (나머지 필드는 기존값 유지):\n   - currentFeature: 이번 세션에서 작업한 기능명 (없으면 기존값 유지)\n   - phase: 현재 단계 (설계 중 / 구현 중 / 검증 중 / 완료 / 대기 중)\n   - decisions: 이번 세션에서 새로 내린 결정만 append, 기존 항목 절대 삭제 금지\n   - blockers: 현재 막힌 문제 목록 (해결된 것은 제거, 새 것은 추가)\n   - nextUp: 다음 세션에서 할 작업\n   - lastUpdated: 오늘 날짜 (YYYY-MM-DD 형식)\n\n3. 수정된 JSON Write\n\n주의: 이번 세션이 단순 Q&A(코드 변경 없음)였으면 lastUpdated만 오늘 날짜로 갱신하고 종료.",
+            "timeout": 30
           }
         ]
       }
