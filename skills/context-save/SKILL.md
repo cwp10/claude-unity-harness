@@ -34,6 +34,7 @@ git rev-parse --show-toplevel 2>/dev/null || pwd
 - `<PROJECT_ROOT>/.claude/feature_list.json`
 
 > ⚠️ 절대 경로 없이 `.claude/...` 상대 경로로 Write를 호출하면 반드시 실패한다.
+> ⚠️ Write 전 반드시 Read 먼저: 파일이 이미 존재하면 Read 없이 Write하면 차단된다. 각 파일을 Write하기 직전에 Read를 시도한다 (없으면 에러 무시).
 
 ### 1단계: 현재 상태 수집
 

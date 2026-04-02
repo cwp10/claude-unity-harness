@@ -163,6 +163,11 @@ fi
 `.git` 여부와 관계없이 항상 아래 두 파일을 `.claude/` 에 생성한다.
 (--force 재실행 시에도 덮어쓴다)
 
+> ⚠️ Write 전 반드시 Read 먼저 실행:
+> `Read("<PROJECT_ROOT>/.claude/claude-progress.txt")` → 없으면 에러 무시
+> `Read("<PROJECT_ROOT>/.claude/feature_list.json")` → 없으면 에러 무시
+> Write 도구는 파일이 존재할 경우 Read 없이 호출하면 차단된다.
+
 **파일 1: .claude/claude-progress.txt**
 
 ```
