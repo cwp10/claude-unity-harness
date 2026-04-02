@@ -7,13 +7,7 @@
           {
             "type": "command",
             "command": "mkdir -p .claude; if [ -f .claude/project-memory.json ]; then echo '=== [claude-unity-harness] 프로젝트 메모리 ===' && cat .claude/project-memory.json; fi; if [ -f .claude/claude-progress.txt ]; then echo '=== [claude-unity-harness] 세션 진행 ===' && cat .claude/claude-progress.txt; fi; if [ -f .claude/feature_list.json ]; then echo '=== [claude-unity-harness] 기능 목록 ===' && cat .claude/feature_list.json; fi; touch .claude/.context_loaded",
-            "timeout": 5
-          },
-          {
-            "type": "agent",
-            "model": "haiku",
-            "prompt": "세션이 시작됐습니다. 아래 순서로 프로젝트 상태를 파악하고 요약을 출력하세요.\n\n1. .claude/project-memory.json Read → 없거나 currentFeature·lastUpdated 등 핵심 필드가 비어있으면 아무것도 출력하지 않고 종료\n2. .claude/claude-progress.txt Read (있으면)\n3. Bash: git log --oneline -5 2>/dev/null\n\n내용이 충분하면 아래 형식으로 출력하세요:\n\n## 세션 복구 완료 ✅\n\n### 마지막 작업\n(claude-progress.txt 세션 이력 최근 1~2항목. 없으면 git log 기준)\n\n### 현재 진행 상황\n(project-memory.json의 currentFeature, phase 기반 2~3줄)\n\n### 최근 커밋\n(git log 결과)\n\n### 다음 작업\n(project-memory.json의 nextUp 또는 claude-progress.txt의 다음 작업)\n\n### 알려진 이슈\n(project-memory.json의 blockers 또는 claude-progress.txt의 알려진 이슈. 없으면 생략)\n\n---\n어떤 작업을 진행할까요?",
-            "timeout": 30
+            "timeout": 10
           }
         ]
       }
