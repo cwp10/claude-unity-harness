@@ -74,6 +74,7 @@ public class PlayerController : MonoBehaviour
     private void Start() { Initialize(); }
     private void Update() { HandleInput(); }
     private void OnDisable() { UnsubscribeEvents(); }
+    private void OnDestroy() { Cleanup(); }
 
     // 6. public 메서드
     public void TakeDamage(float amount) { ... }
@@ -110,6 +111,7 @@ public class PlayerController : MonoBehaviour
 - `renderer.material` Update()에서 반복 접근 금지 → Awake()에서 캐싱 (`sharedMaterial`은 읽기 전용·전체 공유 변경 시만 사용)
 - `public` 필드 직접 노출 → `[SerializeField] private` 사용
 - 구형 `Input.GetKey()` → New Input System 사용
+- `Resources.Load()` 사용 → Addressables로 대체 (런타임 메모리 관리 불가)
 - `OnDisable/OnDestroy`에서 이벤트 구독 해제 누락
 
 ---
@@ -131,18 +133,15 @@ public class PlayerController : MonoBehaviour
 ## 직렬화 규칙
 
 ```csharp
-// Inspector 노출: SerializeField + private
+// Inspector 노출: [SerializeField] private 필수, public 필드 직접 노출 금지
 [SerializeField] private float m_speed = 5f;
 
-// 범위 제한
+// 범위 제한 + Tooltip (주석 대신 Tooltip 사용)
 [Range(0f, 100f)]
+[Tooltip("체력 (0~100)")]
 [SerializeField] private float m_health = 100f;
 
-// Tooltip으로 설명 (주석 대신)
-[Tooltip("The amount of side-to-side friction.")]
-[SerializeField] private float m_grip;
-
-// 관련 데이터 그룹화
+// 관련 데이터 그룹화 — Serializable 중첩 클래스
 [Serializable]
 public class AttackData
 {
@@ -161,6 +160,7 @@ public class AttackData
 private Rigidbody m_rb;
 private Animator m_anim;
 private AudioSource m_audio;
+private Renderer m_childRenderer;
 
 private void Awake()
 {
@@ -176,7 +176,7 @@ private void Awake()
 ### TryGetComponent (Unity 6 권장)
 
 ```csharp
-// ❌ GetComponent + null 체크 — 레퍼런스 타입에서 GC 발생
+// ❌ GetComponent + null 체크 — Editor에서 컴포넌트 미존재 시 allocation 발생
 Rigidbody rb = GetComponent<Rigidbody>();
 if (rb != null) { rb.AddForce(Vector3.up); }
 
