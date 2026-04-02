@@ -29,7 +29,7 @@ keywords: [ensure, verify, retry, fix, guarantee, completion]
 
 ## 실행 순서
 
-### Autopilot 상태 확인
+### Allow 상태 확인
 
 `.claude/settings.json`을 읽어 `permissions.allow`에 `"Bash(*)"` 포함 여부 확인.
 
@@ -37,12 +37,12 @@ keywords: [ensure, verify, retry, fix, guarantee, completion]
 
 **OFF 상태이면:**
 ```
-⚠️  Autopilot이 꺼져 있습니다.
+⚠️  Allow이 꺼져 있습니다.
 
 검증·수정 중 Write·Edit·Bash 도구 사용 시 매번 승인 팝업이 발생합니다.
 완전 자동화를 원하면:
 
-  1. /autopilot on
+  1. /allow on
   2. 세션 재시작
   3. /ensure 재실행
 

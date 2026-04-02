@@ -43,7 +43,7 @@ Unity 프로젝트를 위한 Claude Code 플러그인.
 | `/unity-test [EditMode\|PlayMode\|All]` | 테스트 실행 + 실패 원인 분석 (UnityMCP 필요) · [↓](#16-unity-test-editmodeplaymodeall--테스트-실행-unitymcp-필요) |
 | `/unity-scene-audit` | 씬 품질 감사 — Missing·네이밍·성능 점검 (UnityMCP 필요) · [↓](#17-unity-scene-audit--씬-감사-unitymcp-필요) |
 | `/perf [파일]` | 성능 패턴 탐지 — GC Alloc·캐싱 누락·Draw Call · [↓](#18-perf-파일--성능-분석) |
-| `/autopilot [on\|off]` | 권한 자동 승인 토글 — git push는 항상 차단 · [↓](#19-autopilot-onoff--오토파일럿) |
+| `/allow [on\|off]` | 권한 자동 승인 토글 — git push는 항상 차단 · [↓](#19-allow-onoff--오토파일럿) |
 | `/ship [기능명]` | 전체 개발 파이프라인 — 설계 승인 1회 후 구현→리뷰→감사→검증 자동 · [↓](#20-ship-기능명--전체-파이프라인) |
 | `/ensure [대상]` | 검증 + 실패 시 자동 수정 재시도 (최대 3회) · [↓](#21-ensure-대상--검증-재시도) |
 
@@ -60,7 +60,7 @@ claude-unity-harness/
 │   ├── refactor/            리팩토링 플랜 + 실행
 │   ├── audit/               전체 감사 (migrate · localize 서브커맨드 포함)
 │   ├── perf/                성능 패턴 탐지
-│   ├── autopilot/           권한 자동 승인 토글
+│   ├── allow/           권한 자동 승인 토글
 │   ├── ship/                전체 개발 파이프라인
 │   ├── ensure/              검증 + 자동 재시도 루프
 │   ├── fix/                 버그 진단
@@ -180,7 +180,7 @@ claude-unity-harness/
 # 전체 자동화 흐름 (권장 — 설계 승인 1회 후 자동)
 
 # 세션 최초 1회 설정
-/autopilot on  → 세션 재시작
+/allow on  → 세션 재시작
 
 # 이후 매 기능마다 반복 사용
 /ship 보스 전투 패턴
@@ -523,15 +523,15 @@ Critical 항목마다 수정 코드 예시를 함께 제시합니다.
 
 ---
 
-### 19. `/autopilot [on|off]` — 오토파일럿
+### 19. `/allow [on|off]` — 오토파일럿
 
 `.claude/settings.json`의 권한 설정을 토글합니다. 인수 없이 실행하면 현재 상태를 확인합니다.
 
 | 커맨드 | 동작 |
 |--------|------|
-| `/autopilot` | 현재 ON/OFF 상태 + allow·deny 목록 출력 |
-| `/autopilot on` | `Bash(*)`·`Edit(*)`·`Write(*)` 자동 승인 추가 |
-| `/autopilot off` | 추가된 자동 승인 항목 제거, 기본 승인 방식 복원 |
+| `/allow` | 현재 ON/OFF 상태 + allow·deny 목록 출력 |
+| `/allow on` | `Bash(*)`·`Edit(*)`·`Write(*)` 자동 승인 추가 |
+| `/allow off` | 추가된 자동 승인 항목 제거, 기본 승인 방식 복원 |
 
 **ON 시 권한 구성:**
 - 자동 승인: `Bash(*)`·`Edit(*)`·`Write(*)`
@@ -542,11 +542,11 @@ Critical 항목마다 수정 코드 예시를 함께 제시합니다.
 
 **`/ship` · `/ensure`와 연계:**
 
-`/ship`과 `/ensure`는 시작 시 자동으로 Autopilot 상태를 확인합니다. OFF 상태이면 경고를 출력하고, 켜는 방법을 안내합니다. 완전 자동화를 원한다면 세션 시작 시 `/autopilot on` → 재시작 후 사용하세요.
+`/ship`과 `/ensure`는 시작 시 자동으로 Autopilot 상태를 확인합니다. OFF 상태이면 경고를 출력하고, 켜는 방법을 안내합니다. 완전 자동화를 원한다면 세션 시작 시 `/allow on` → 재시작 후 사용하세요.
 
 ```
 # 권장 설정 흐름
-/autopilot on      ← 세션 시작 시 1회
+/allow on      ← 세션 시작 시 1회
 → 세션 재시작
 → /ship 기능명     ← 이후 매번 사용 가능
 ```
@@ -557,7 +557,7 @@ Critical 항목마다 수정 코드 예시를 함께 제시합니다.
 
 **설계 플랜 승인 1회** 후 구현→리뷰→감사→검증까지 자동으로 진행합니다.
 
-시작 시 Autopilot 상태를 자동 확인합니다. OFF이면 경고 후 `/autopilot on` → 재시작을 안내합니다.
+시작 시 Autopilot 상태를 자동 확인합니다. OFF이면 경고 후 `/allow on` → 재시작을 안내합니다.
 
 | 단계 | 내용 | 승인 |
 |------|------|------|

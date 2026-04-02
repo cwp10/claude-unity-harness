@@ -23,7 +23,7 @@ keywords: [ship, pipeline, workflow, end-to-end, development]
 ## Ship 개요
 
 ```
-0단계: Autopilot 상태 확인 (OFF면 경고)
+0단계: Allow 상태 확인 (OFF면 경고)
 1단계: 요구사항 확인       (자동)
 2단계: 설계 플랜           (승인 필요 — 이후 자동)
 3단계: 코드 구현           (자동)
@@ -37,18 +37,18 @@ keywords: [ship, pipeline, workflow, end-to-end, development]
 
 ---
 
-## 0단계: Autopilot 상태 확인
+## 0단계: Allow 상태 확인
 
 `.claude/settings.json`을 읽어 `permissions.allow`에 `"Bash(*)"` 포함 여부 확인:
 
 **OFF 상태이면:**
 ```
-⚠️  Autopilot이 꺼져 있습니다.
+⚠️  Allow이 꺼져 있습니다.
 
 /ship 진행 중 Write·Edit·Bash 도구 사용 시 매번 승인 팝업이 발생합니다.
 완전 자동화를 원하면:
 
-  1. /autopilot on
+  1. /allow on
   2. 세션 재시작
   3. /ship $ARGUMENTS 재실행
 
