@@ -148,7 +148,11 @@ if [ -n "$PLUGIN_ROOT" ] && [ -d "$PLUGIN_ROOT" ]; then
   cp "$PLUGIN_ROOT/engines/unity.md"       .claude/engines/unity.md
   cp "$PLUGIN_ROOT/languages/csharp.md"    .claude/languages/csharp.md
   cp "$PLUGIN_ROOT/domains/unity.md"       .claude/domains/unity.md
-  echo "컨텍스트 파일 복사 완료: engines/ languages/ domains/"
+  # 상세 규칙 서브디렉토리 복사 (on-demand 로딩용)
+  [ -d "$PLUGIN_ROOT/engines/unity" ]    && cp -r "$PLUGIN_ROOT/engines/unity"    .claude/engines/
+  [ -d "$PLUGIN_ROOT/languages/csharp" ] && cp -r "$PLUGIN_ROOT/languages/csharp" .claude/languages/
+  [ -d "$PLUGIN_ROOT/domains/unity" ]    && cp -r "$PLUGIN_ROOT/domains/unity"    .claude/domains/
+  echo "컨텍스트 파일 복사 완료: engines/ languages/ domains/ (+ detail 서브디렉토리)"
 else
   echo "ERROR: 플러그인 캐시를 찾을 수 없습니다. claude-unity-harness 설치 여부를 확인하세요."
 fi
