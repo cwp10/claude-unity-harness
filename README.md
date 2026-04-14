@@ -609,6 +609,8 @@ verifier 실행 → PASS → 완료 ✅
 
 | 버전 | 주요 변경 |
 |------|----------|
+| v1.0.53 | response.md 공통 지침 — 주석 최소화 원칙 추가 (What 금지·Why만 작성, 비자명한 제약·불변조건·버그 우회만 허용). C#/Unity 전용 규칙과 별개의 언어 무관 공통 원칙으로 분리. |
+| v1.0.52 | response.md 다이어그램 규칙 추가 — Mermaid 8.8.9 호환 문법 고정 (`graph TD/LR` 사용, `flowchart` 키워드 금지). claude-progress.txt 갱신. |
 | v1.0.51 | setup·context-save — 기존 파일 있는 프로젝트 재실행 시 Write 전 Read 필수 주의사항 추가. `/setup` 재실행 시 `claude-progress.txt`·`feature_list.json` 차단 오류 수정. |
 | v1.0.50 | pre-commit hook 4단계 복원 — `[1/4]` .meta · `[2/4]` 컴파일 · `[3/4]` 코드 리뷰 · `[4/4]` 문서 자동화. 에이전트 호출 실패 시 "실패" → "생략"으로 표현 변경. macOS 지원 및 IS_INITIAL_COMMIT 개선 통합. |
 | v1.0.49 | 규칙 파일 구조 전면 개편 — engines/languages/domains 제거, `.claude/rules/` 통합 (paths frontmatter 조건부 자동 로드). unity-engine.md·unity-domain.md·csharp.md 핵심 파일 70줄 이하 경량화. unity/·csharp/ 서브디렉토리로 세부 규칙 on-demand 분리. C# 버전 10으로 정정. |
