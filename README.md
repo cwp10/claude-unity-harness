@@ -609,6 +609,7 @@ verifier 실행 → PASS → 완료 ✅
 
 | 버전 | 주요 변경 |
 |------|----------|
+| v1.0.54 | 주석 규칙 강화 — response.md·csharp/patterns.md "기본값은 주석 없음" 원칙 명시. 절대 금지 항목 구체화(What 반복·작업/이슈 언급·죽은 코드·장식 주석·형식적 docstring·필드명 한국어 풀이). 판정 기준("지워도 혼란 없으면 쓰지 말 것) 추가. |
 | v1.0.53 | response.md 공통 지침 — 주석 최소화 원칙 추가 (What 금지·Why만 작성, 비자명한 제약·불변조건·버그 우회만 허용). C#/Unity 전용 규칙과 별개의 언어 무관 공통 원칙으로 분리. |
 | v1.0.52 | response.md 다이어그램 규칙 추가 — Mermaid 8.8.9 호환 문법 고정 (`graph TD/LR` 사용, `flowchart` 키워드 금지). claude-progress.txt 갱신. |
 | v1.0.51 | setup·context-save — 기존 파일 있는 프로젝트 재실행 시 Write 전 Read 필수 주의사항 추가. `/setup` 재실행 시 `claude-progress.txt`·`feature_list.json` 차단 오류 수정. |
