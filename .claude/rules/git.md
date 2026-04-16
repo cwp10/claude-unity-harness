@@ -23,3 +23,4 @@
 - 빌드 안 되는 상태로 커밋
 - 민감 정보(API 키, 비밀번호) 커밋
 - .meta 파일 누락 (Unity)
+- 커밋 작성자에 Claude 포함 금지 (`--author`, `Co-authored-by` 트레일러 사용 금지)
